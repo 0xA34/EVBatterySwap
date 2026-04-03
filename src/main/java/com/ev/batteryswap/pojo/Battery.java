@@ -1,6 +1,8 @@
 package com.ev.batteryswap.pojo;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -9,6 +11,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "batteries")
 public class Battery {
@@ -62,108 +66,5 @@ public class Battery {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getSerialNumber() {
-        return serialNumber;
-    }
-
-    public void setSerialNumber(String serialNumber) {
-        this.serialNumber = serialNumber;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public BigDecimal getCapacityKwh() {
-        return capacityKwh;
-    }
-
-    public void setCapacityKwh(BigDecimal capacityKwh) {
-        this.capacityKwh = capacityKwh;
-    }
-
-    public BigDecimal getCurrentChargePercentage() {
-        return currentChargePercentage;
-    }
-
-    public void setCurrentChargePercentage(BigDecimal currentChargePercentage) {
-        this.currentChargePercentage = currentChargePercentage;
-    }
-
-    public BigDecimal getHealthPercentage() {
-        return healthPercentage;
-    }
-
-    public void setHealthPercentage(BigDecimal healthPercentage) {
-        this.healthPercentage = healthPercentage;
-    }
-
-    public Integer getChargeCycles() {
-        return chargeCycles;
-    }
-
-    public void setChargeCycles(Integer chargeCycles) {
-        this.chargeCycles = chargeCycles;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public LocalDate getManufactureDate() {
-        return manufactureDate;
-    }
-
-    public void setManufactureDate(LocalDate manufactureDate) {
-        this.manufactureDate = manufactureDate;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Instant updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
 }
