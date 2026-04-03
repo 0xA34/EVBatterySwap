@@ -1,0 +1,30 @@
+/* admin.css */
+
+/* 1. Trạng thái bình thường (Menu mở) */
+.logout-text {
+    display: inline-block;
+}
+
+/* 2. Trạng thái thu nhỏ (Menu đóng - sidebar-collapse) */
+body.sidebar-collapse .sidebar-footer {
+    padding: 0 !important; /* Xóa khoảng đệm của khung chứa */
+}
+
+body.sidebar-collapse .sidebar-footer .btn {
+    width: 100% !important;        /* Nút rộng 100% */
+    padding: 10px 0 !important;    /* Giữ độ cao nút */
+
+    /* Dùng Flexbox để căn giữa tuyệt đối icon */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+}
+
+body.sidebar-collapse .logout-text {
+    display: none !important;      /* Ẩn chữ */
+}
+
+body.sidebar-collapse .sidebar-footer i {
+    margin: 0 !important;          /* QUAN TRỌNG: Xóa margin-right (mr-2) làm lệch icon */
+}
