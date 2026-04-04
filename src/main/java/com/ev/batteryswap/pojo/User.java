@@ -39,11 +39,11 @@ public class User {
 
     @ColumnDefault("'DRIVER'")
     @Column(name = "role")
-    private String role;
+    private String role = "DRIVER";
 
     @Lob
     @Column(name = "status")
-    private String status;
+    private String status = "ACTIVE";
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
