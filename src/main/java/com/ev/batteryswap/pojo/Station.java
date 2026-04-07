@@ -30,10 +30,9 @@ public class Station {
     @Column(name = "province", nullable = false, length = 45)
     private String province;
 
-    @ColumnDefault("'ACTIVE'")
     @Lob
     @Column(name = "status", nullable = false)
-    private String status;
+    private String status = "ACTIVE";
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")

@@ -28,10 +28,9 @@ public class Reservation {
     @Column(name = "reservation_time", nullable = false)
     private Instant reservationTime;
 
-    @ColumnDefault("'PENDING'")
     @Lob
     @Column(name = "status", nullable = false)
-    private String status;
+    private String status = "PENDING";
 
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
