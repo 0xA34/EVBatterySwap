@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/header :: common_header('Dashboard Tổng Quan')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/header :: sidebar('dashboard')}"></aside>
+
+    <div class="content-wrapper">
+        <div class="content-header">
+            <div class="container-fluid">
+                <h1 class="m-0">Tổng Quan Hệ Thống</h1>
+            </div>
+        </div>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3>0 ₫</h3>
+                                <p>Tổng Doanh Thu</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-coins"></i></div>
+                            <a class="small-box-footer">Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>0</h3>
+                                <p>Lượt đổi pin</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-exchange-alt"></i></div>
+                            <a class="small-box-footer">Xem nhật ký <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-warning">
+                            <div class="inner">
+                                <h3 >0</h3>
+                                <p>Trạm hoạt động</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-charging-station"></i></div>
+                            <a class="small-box-footer">Quản lý trạm <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-danger">
+                            <div class="inner">
+                                <h3 >0</h3>
+                                <p>Pin cần bảo dưỡng</p>
+                            </div>
+                            <div class="icon"><i class="fas fa-tools"></i></div>
+                            <a class="small-box-footer">Xử lý ngay <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-primary card-outline">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="far fa-chart-bar mr-1"></i>
+                                    Tần suất đổi pin trong ngày (Giờ cao điểm)
+                                </h3>
+                                <div class="card-tools">
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                                    <button type="button" class="btn btn-tool" data-card-widget="remove"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart">
+                                    <canvas id="dashboardChart" style="min-height: 350px; height: 350px; max-height: 350px; max-width: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</div>
+
+<div th:replace="~{admin/fragments/footer :: common_scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

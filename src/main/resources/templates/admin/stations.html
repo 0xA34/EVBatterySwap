@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/header :: common_header('Quản lý Trạm')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/header :: sidebar('stations')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1>Quản lý Trạm</h1></div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/templates/admin}">Home</a></li>
+                            <li class="breadcrumb-item active">Quản lý Trạm</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>0</h3><p>Tổng trạm</p></div><div class="icon"><i class="fas fa-map-marker-alt"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>0</h3><p>Hoạt động</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>0</h3><p>Bảo trì</p></div><div class="icon"><i class="fas fa-tools"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>0</h3><p>Không hoạt động</p></div><div class="icon"><i class="fas fa-times-circle"></i></div></div></div>
+                </div>
+                <div class="row mb-3"><div class="col-12"><a class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm trạm mới</a></div></div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Danh sách Trạm</h3></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead><tr><th>ID</th><th>Tên trạm</th><th>Địa chỉ</th><th>Trạng thái</th><th>Ngày tạo</th><th>Cập nhật cuối</th><th>Thao tác</th></tr></thead>
+                                <tbody>
+                                <tr class="text-center">Không tìm thấy trạm nào.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/footer :: common_scripts}"></div>
+</body>
+</html>

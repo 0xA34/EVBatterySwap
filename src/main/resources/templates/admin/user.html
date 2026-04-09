@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/header :: common_header('Quản lý Users')}"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/header :: sidebar('users')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1 th:text="${pageTitle ?: 'Quản lý Users'}">Quản lý Users</h1></div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
+                            <li class="breadcrumb-item active">Quản lý Users</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card card-outline card-primary">
+                    <div class="card-header"><h3 class="card-title">Bộ lọc và Tìm kiếm</h3></div>
+                    <div class="card-body">
+                        <form id="filterForm" th:action="@{/admin/user}" method="get" class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="filterSearch">Tìm kiếm:</label>
+                                    <input type="text" name="search" id="filterSearch" class="form-control" placeholder="Nhập username, họ tên hoặc email..." th:value="${search}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 align-self-end">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-search mr-1"></i> Tìm</button>
+                                    <a th:href="@{/admin/user}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Xóa bộ lọc</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <a class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm người dùng mới</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title" id="tableTitle">Danh sách Users</h3></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Họ và Tên</th>
+                                    <th>Email</th>
+                                    <th>Vai trò</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Cập nhật cuối</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td colspan="7" class="text-center">Không tìm thấy người dùng nào.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer clearfix">
+                        <div class="row">
+                            <div class="col-md-6 text-muted">
+                                Hiển thị người dùng
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</div>
+
+<div th:replace="~{admin/fragments/footer :: common_scripts}"></div>
+
+</body>
+</html>

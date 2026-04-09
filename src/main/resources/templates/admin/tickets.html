@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/header :: common_header('Quản lý Hỗ trợ')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/header :: sidebar('tickets')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid"><h1>Quản lý Hỗ trợ</h1></div>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>0</h3><p>Tổng Tickets</p></div><div class="icon"><i class="fas fa-ticket-alt"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>0</h3><p>Đang mở</p></div><div class="icon"><i class="fas fa-folder-open"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>0</h3><p>Đang xử lý</p></div><div class="icon"><i class="fas fa-clock"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>0</h3><p>Khẩn cấp</p></div><div class="icon"><i class="fas fa-exclamation-triangle"></i></div></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Danh sách Tickets</h3></div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead><tr><th>ID</th><th>Tiêu đề</th><th>Trạng thái</th><th>Ưu tiên</th><th>Ngày tạo</th><th>Cập nhật cuối</th><th>Thao tác</th></tr></thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/footer :: common_scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ========================================================== -->
+<!--            FOOTER                                         -->
+<!-- ========================================================== -->
+<footer class="main-footer" th:fragment="footer">
+    <strong>Copyright &copy; 2025 <a href="#">Your Company</a>.</strong>
+    All rights reserved.
+    <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 1.0.0
+    </div>
+</footer>
+
+<!-- ========================================================== -->
+<!--         COMMON SCRIPTS                                     -->
+<!-- ========================================================== -->
+<div th:fragment="common_scripts">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE App -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- JS Tùy chỉnh Admin -->
+    <script th:src="@{/js/admin.js}"></script>
+    <script>
+        // Cấu hình chung JS nếu cần
+    </script>
+</div>
+
+</body>
+</html>
