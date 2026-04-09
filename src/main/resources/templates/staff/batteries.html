@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{staff/fragments/header :: common_header('Quản lý Pin')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{staff/fragments/header :: navbar}"></nav>
+
+    <aside th:replace="~{staff/fragments/header :: sidebar('batteries')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Quản lý Pin tại trạm <span class="text-primary"></span></h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/staff}">Home</a></li>
+                            <li class="breadcrumb-item active">Kho Pin</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-filter mr-1"></i> Bộ lọc</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/staff/batteries}" method="get" class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Trạng thái:</label>
+                                    <select name="status" class="form-control">
+                                        <option value="">Tất cả</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Tìm kiếm:</label>
+                                    <input type="text" name="search" class="form-control"
+                                           placeholder="Nhập mã Serial pin..." />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 align-self-end">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search mr-1"></i> Lọc
+                                    </button>
+                                    <a th:href="@{/staff/batteries}" class="btn btn-secondary">
+                                        <i class="fas fa-sync-alt mr-1"></i> Làm mới
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách Pin >0</span>)</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Mã Serial</th>
+                                    <th>Dòng xe (Model)</th>
+                                    <th>Dung lượng</th>
+                                    <th>Pin (%)</th>
+                                    <th>Sức khỏe (SoH)</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-box-open fa-3x mb-3"></i><br />
+                                        Không tìm thấy viên pin nào.
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div th:insert="~{admin/fragments/footer :: footer}"></div>
+
+</div>
+
+<div th:insert="~{admin/fragments/footer :: common_scripts}"></div>
+
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark"><i class="fas fa-exclamation-triangle mr-2"></i>Báo hỏng Pin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="batteryId" id="modalBatteryId" />
+
+                    <div class="alert alert-light border">
+                        Bạn đang thực hiện báo hỏng cho Pin: <strong id="modalBatterySerial" class="text-danger"></strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">Mô tả sự cố / Lý do hỏng:</label>
+                        <textarea name="reason" class="form-control" rows="4" required
+                                  placeholder="Vui lòng mô tả chi tiết lỗi (ví dụ: Vỏ nứt, không nhận sạc, đèn báo lỗi...)"></textarea>
+                    </div>
+
+                    <div class="text-muted small">
+                        <i class="fas fa-info-circle"></i> Lưu ý: Sau khi xác nhận, trạng thái pin sẽ chuyển sang <b>MAINTENANCE</b> và không thể dùng để đổi cho khách.
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-warning font-weight-bold">Xác nhận Báo hỏng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

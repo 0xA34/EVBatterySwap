@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{staff/fragments/header :: common_header('Quản lý Đặt lịch')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{staff/fragments/header :: navbar}"></nav>
+    <aside th:replace="~{staff/fragments/header :: sidebar('reservations')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1>Danh sách Đặt lịch (Check-in)</h1>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div class="card">
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Khách hàng</th>
+                                <th>Pin Giữ Chỗ</th>
+                                <th>Giờ hẹn</th>
+                                <th>Hết hạn lúc</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    <i class="fas fa-calendar-times fa-2x mb-2"></i><br>
+                                    Hiện không có khách đặt lịch nào đang chờ.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div th:insert="~{admin/fragments/footer :: footer}"></div>
+</div>
+
+<div th:insert="~{admin/fragments/footer :: common_scripts}"></div>
+
+<div class="modal fade" id="checkinModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form th:action="@{/staff/reservations/complete}" method="post">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title text-white"><i class="fas fa-check-circle mr-2"></i>Xác nhận Giao dịch (Check-in)</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="reservationId" id="modalResId">
+
+                    <div class="alert alert-light border">
+                        <p class="mb-1">Khách hàng: <strong id="modalUser" class="text-dark"></strong></p>
+                        <p class="mb-0">Pin mới (Đã giữ): <strong id="modalBatteryOut" class="text-primary"></strong></p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pin Khách Trả lại (Pin cũ):</label>
+                        <select name="batteryInId" class="form-control" required id="batteryInSelect">
+                            <option value="">-- Chọn pin cũ khách trả --</option>
+                        </select>
+                        <small class="form-text text-muted">Hệ thống tự động lọc danh sách pin mà khách này đang thuê.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phương thức thanh toán:</label>
+                        <select name="paymentMethod" class="form-control">
+                            <option value="CASH">Tiền mặt</option>
+                            <option value="WALLET">Ví điện tử (Trừ số dư)</option>
+                            <option value="CARD">Thẻ tín dụng/ATM</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success font-weight-bold">Hoàn tất & Đổi pin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
