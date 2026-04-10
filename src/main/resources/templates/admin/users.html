@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Quản lý Users')}"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('users')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1 th:text="${pageTitle ?: 'Quản lý Users'}">Quản lý Users</h1></div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
+                            <li class="breadcrumb-item active">Quản lý Users</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+                <div class="card card-outline card-primary">
+                    <div class="card-header"><h3 class="card-title">Bộ lọc và Tìm kiếm</h3></div>
+                    <div class="card-body">
+                        <form id="filterForm" th:action="@{/admin/users}" method="get" class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="filterSearch">Tìm kiếm:</label>
+                                    <input type="text" name="search" id="filterSearch" class="form-control" placeholder="Nhập username, họ tên hoặc email..." th:value="${search}">
+                                </div>
+                            </div>
+                            <div class="col-md-6 align-self-end">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-search mr-1"></i> Tìm</button>
+                                    <a th:href="@{/admin/users}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Xóa bộ lọc</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <a th:href="@{/admin/users/new}" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm người dùng mới</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title" id="tableTitle">Danh sách Users (<span th:text="${userPage.totalElements}">0</span>)</h3></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Họ và Tên</th>
+                                    <th>Email</th>
+                                    <th>Vai trò</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Cập nhật cuối</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="user : ${userPage.content}">
+                                    <td th:text="${user.id}">1</td>
+                                    <td><strong th:text="${user.username}">username</strong></td>
+                                    <td th:text="${user.fullName}">Nguyễn Văn A</td>
+                                    <td th:text="${user.email}">email@example.com</td>
+                                    <td>
+                                            <span class="badge"
+                                                  th:classappend="${#strings.equalsIgnoreCase(user.role, 'ADMIN')} ? 'badge-danger' : (${#strings.equalsIgnoreCase(user.role, 'STAFF')} ? 'badge-warning' : 'badge-primary')"
+                                                  th:text="${user.role}">ADMIN</span>
+                                    </td>
+                                    <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                    <td th:text="${user.updatedAt != null ? #temporals.format(user.updatedAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                    <td>
+                                        <a th:href="@{/admin/users/edit/{id}(id=${user.id})}" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i> Sửa</a>
+
+                                        <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa người dùng này?');"><i class="fas fa-trash"></i> Xóa</a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${userPage.empty}">
+                                    <td colspan="7" class="text-center">Không tìm thấy người dùng nào.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer clearfix" th:if="${userPage.totalPages > 1}">
+                        <div class="row">
+                            <div class="col-md-6 text-muted">
+                                Hiển thị <span th:text="${userPage.pageable.offset + 1}"></span>-<span th:text="${userPage.pageable.offset + userPage.numberOfElements}"></span> / <span th:text="${userPage.totalElements}"></span> người dùng
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="pagination pagination-sm m-0 float-right">
+                                    <li class="page-item" th:classappend="${userPage.first} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/admin/users(page=${userPage.number - 1}, search=${search})}">Trước</a>
+                                    </li>
+                                    <li th:each="i : ${#numbers.sequence(0, userPage.totalPages - 1)}" class="page-item" th:classappend="${i == userPage.number} ? 'active'">
+                                        <a class="page-link" th:href="@{/admin/users(page=${i}, search=${search})}" th:text="${i + 1}"></a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${userPage.last} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/admin/users(page=${userPage.number + 1}, search=${search})}">Sau</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+
+</body>
+</html>

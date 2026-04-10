@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ========================================================== -->
+<!--             ALERTS                                         -->
+<!-- ========================================================== -->
+<div th:fragment="alerts">
+    <!-- Alert từ Controller (Flash Attributes / Model) -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle mr-2"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <!-- Placeholder cho alert từ JS (của trang hiện tại) -->
+    <div id="alertPlaceholder"></div>
+    <!-- Container cho notification toast từ JS (admin.js) -->
+    <div id="notificationContainer" style="position: fixed; top: 20px; right: 20px; z-index: 3000;"></div>
+</div>
+
+</body>
+</html>

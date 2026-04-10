@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/fragments/header :: common_header('Dashboard Tổng Quan')}"></head>
+<head th:replace="~{admin/fragments/_header :: common_header('Dashboard Tổng Quan')}"></head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-    <nav th:replace="~{admin/fragments/header :: navbar}"></nav>
-    <aside th:replace="~{admin/fragments/header :: sidebar('dashboard')}"></aside>
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('dashboard')}"></aside>
 
     <div class="content-wrapper">
         <div class="content-header">
@@ -84,10 +84,10 @@
             </div>
         </section>
     </div>
-    <footer th:replace="~{admin/fragments/footer :: footer}"></footer>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
 </div>
 
-<div th:replace="~{admin/fragments/footer :: common_scripts}"></div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
