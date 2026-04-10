@@ -120,21 +120,39 @@
         </div>
 
         <!-- SweetAlert2: Không có quyền truy cập (sai role) -->
-        <div th:if="${accessDenied}">
-            <script>
-                Swal.fire({
-                    icon: "error",
-                    title: "Truy cập bị từ chối!",
-                    text: "Bạn không có quyền đăng nhập vào trang Nhân Viên.",
-                    confirmButtonColor: "#dc3545",
-                    confirmButtonText: '<i class="fas fa-times"></i> Đóng',
-                    background: "#fff",
-                    customClass: {
-                        title: "text-danger",
-                    },
+        <script>
+            document.getElementById("loginFormStaff").addEventListener("submit", async function(event){
+                event.preventDefault(); // chặn submit truyền thống
+                const formData = new FormData(this);
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    body: formData
                 });
-            </script>
-        </div>
+
+                const result = await response;
+
+                if (result.ok) {
+                    Swal.fire({
+                        heightAuto: false,
+                        icon: 'success',
+                        title: await result.text(),
+                        text: 'Chào mừng bạn quay trở lại.',
+                        confirmButtonText: 'Chuyển hướng'
+                    }).then(() => {
+                        window.location.href = '/staff/dashboard';
+                    });
+                } else {
+                    Swal.fire({
+                        heightAuto: false,
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: await result.text()
+                    });
+                }
+            });
+        </script>
+
+
 
         <!-- Toggle mật khẩu -->
         <script>

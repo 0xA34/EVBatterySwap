@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Battery Swap Station Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+</head>
+<body>
+
+<div th:insert="user/header-user :: site-header-user"></div>
+
+<script th:src="@{/js/notifications.js}"></script>
+
+
+<main class="landing">
+    <section class="hero">
+        <div class="container hero-inner">
+            <div class="hero-copy">
+                <h1 class="hero-title">EV Battery Swap Station Management System</h1>
+                <p class="hero-subtitle">Phần mềm quản lý trạm đổi pin xe điện</p>
+                <p class="hero-desc">Giám sát trạng thái trạm, quản lý tồn kho pin, điều phối đổi pin theo thời gian thực, báo cáo hiệu suất và cảnh báo sự cố.</p>
+                <div class="hero-actions">
+                    <a href="dashboard" class="button primary">Vào Dashboard</a>
+                </div>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <div class="hero-card">
+                    <div class="hero-metric">
+                        <span class="metric-label">Trạm hoạt động</span>
+                        <span class="metric-value">24</span>
+                    </div>
+                    <div class="hero-metric">
+                        <span class="metric-label">Lượt đổi hôm nay</span>
+                        <span class="metric-value">1.268</span>
+                    </div>
+                    <div class="hero-metric">
+                        <span class="metric-label">Tồn kho pin</span>
+                        <span class="metric-value">542</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container features-grid">
+            <article class="feature">
+                <h3>Quản lý trạm</h3>
+                <p>Theo dõi trạng thái online/offline, công suất, lịch bảo trì và nhật ký hoạt động.</p>
+            </article>
+            <article class="feature">
+                <h3>Quản lý pin</h3>
+                <p>Quản lý vòng đời pin, phân loại, chất lượng, tồn kho theo trạm và lịch sử đổi.</p>
+            </article>
+            <article class="feature">
+                <h3>Điều phối thời gian thực</h3>
+                <p>Phân luồng khách, dự báo nhu cầu, cân bằng tải giữa các trạm lân cận.</p>
+            </article>
+            <article class="feature">
+                <h3>Báo cáo & Cảnh báo</h3>
+                <p>Bảng điều khiển KPI, cảnh báo sự cố, cảnh báo tồn kho thấp và báo cáo định kỳ.</p>
+            </article>
+        </div>
+    </section>
+</main>
+<div th:insert="footer :: site-footer"></div>
+</body>
+</html>

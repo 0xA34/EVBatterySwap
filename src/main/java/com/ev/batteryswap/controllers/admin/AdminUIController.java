@@ -1,5 +1,6 @@
 package com.ev.batteryswap.controllers.admin;
 
+import com.ev.batteryswap.controllers.AuthController;
 import com.ev.batteryswap.security.JwtCookieHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +22,7 @@ public class AdminUIController {
     public String loginPage(HttpServletRequest request) {
         String token = jwtCookieHelper.extractCookieToken(
             request,
-            AdminLoginController.COOKIE_NAME
+                AuthController.COOKIE_NAME
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "ADMIN")) {
             return "redirect:/admin/dashboard";
@@ -33,7 +34,7 @@ public class AdminUIController {
     public String dashboard(HttpServletRequest request) {
         String token = jwtCookieHelper.extractCookieToken(
             request,
-            AdminLoginController.COOKIE_NAME
+            AuthController.COOKIE_NAME
         );
         if (
             token == null || !jwtCookieHelper.isValidRoleToken(token, "ADMIN")
@@ -43,17 +44,4 @@ public class AdminUIController {
         return "admin/dashboard";
     }
 
-    @GetMapping("/logout")
-    public String logout(
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
-        jwtCookieHelper.revokeAndExpireCookie(
-            request,
-            response,
-            AdminLoginController.COOKIE_NAME,
-            AdminLoginController.COOKIE_PATH
-        );
-        return "redirect:/admin/login";
-    }
 }

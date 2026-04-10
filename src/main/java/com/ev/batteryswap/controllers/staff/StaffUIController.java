@@ -1,5 +1,6 @@
 package com.ev.batteryswap.controllers.staff;
 
+import com.ev.batteryswap.controllers.AuthController;
 import com.ev.batteryswap.security.JwtCookieHelper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +22,7 @@ public class StaffUIController {
     public String loginPage(HttpServletRequest request) {
         String token = jwtCookieHelper.extractCookieToken(
             request,
-            StaffLoginController.COOKIE_NAME
+                AuthController.COOKIE_NAME
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "STAFF")) {
             return "redirect:/staff/dashboard";
@@ -33,7 +34,7 @@ public class StaffUIController {
     public String dashboard(HttpServletRequest request) {
         String token = jwtCookieHelper.extractCookieToken(
             request,
-            StaffLoginController.COOKIE_NAME
+                AuthController.COOKIE_NAME
         );
         if (
             token == null || !jwtCookieHelper.isValidRoleToken(token, "STAFF")
@@ -51,8 +52,8 @@ public class StaffUIController {
         jwtCookieHelper.revokeAndExpireCookie(
             request,
             response,
-            StaffLoginController.COOKIE_NAME,
-            StaffLoginController.COOKIE_PATH
+                AuthController.COOKIE_NAME,
+                AuthController.COOKIE_PATH
         );
         return "redirect:/staff/login";
     }

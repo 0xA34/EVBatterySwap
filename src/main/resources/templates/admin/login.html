@@ -103,18 +103,35 @@
         </div>
 
         <!-- SweetAlert2: Bảng đỏ khi không có quyền truy cập -->
-        <script th:if="${accessDenied}">
-            Swal.fire({
-                icon: "error",
-                title: "Không có quyền truy cập!",
-                text: "Bạn không có quyền đăng nhập vào trang Admin.",
-                confirmButtonColor: "#dc3545",
-                confirmButtonText: '<i class="fas fa-times mr-1"></i> Đóng',
-                background: "#fff",
-                customClass: {
-                    title: "text-danger",
-                    confirmButton: "btn btn-danger",
-                },
+        <script>
+            document.getElementById("loginFormAdmin").addEventListener("submit", async function(event){
+                event.preventDefault(); // chặn submit truyền thống
+                const formData = new FormData(this);
+                const response = await fetch("/api/login", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const result = await response;
+
+                if (result.ok) {
+                    Swal.fire({
+                        heightAuto: false,
+                        icon: 'success',
+                        title: await result.text(),
+                        text: 'Chào mừng bạn quay trở lại.',
+                        confirmButtonText: 'Chuyển hướng'
+                    }).then(() => {
+                        window.location.href = '/admin/dashboard';
+                    });
+                } else {
+                    Swal.fire({
+                        heightAuto: false,
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: await result.text()
+                    });
+                }
             });
         </script>
     </body>
