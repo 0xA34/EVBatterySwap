@@ -1,4 +1,4 @@
-package com.ev.batteryswap.controllers;
+package com.ev.batteryswap.controllers.user;
 
 import com.ev.batteryswap.dto.UserProfileDTO;
 import com.ev.batteryswap.services.UserService;
