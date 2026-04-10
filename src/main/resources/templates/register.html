@@ -30,6 +30,12 @@
                     <span class="label">Tên Tài Khoản</span>
                     <input type="text" name="username" placeholder="username" required>
                 </label>
+
+                <label class="field">
+                    <span class="label">Địa Chỉ Email</span>
+                    <input type="text" name="email" placeholder="email" required>
+                </label>
+
                 <label class="field">
                     <span class="label">Mật Khẩu</span>
                     <input type="password" name="password" placeholder="••••••••" required>
@@ -45,6 +51,36 @@
                     Đã có tài khoản? <a class="link" href="login">Đăng nhập</a>
                 </p>
             </form>
+            <script>
+                document.getElementById("registerForm").addEventListener("submit", async function(event){
+                    event.preventDefault(); // chặn submit truyền thống
+                    const formData = new FormData(this);
+
+                    const response = await fetch("/api/register", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const result = await response;
+
+                    if (result.ok) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: await result.text(),
+                            text: 'Mời bạn đăng nhập để tiếp tục.',
+                            confirmButtonText: 'Đăng nhập'
+                        }).then(() => {
+                            window.location.href = '/login'; // chuyển sang trang login.html
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: await result.text(),
+                        });
+                    }
+                });
+            </script>
         </section>
     </div>
 </main>

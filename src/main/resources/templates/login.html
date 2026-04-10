@@ -39,12 +39,52 @@
                     Đã chưa có tài khoản? <a class="link" href="register">Đăng ký</a>
                 </p>
             </form>
+            <script>
+                document.getElementById("loginForm").addEventListener("submit", async function(event){
+                    event.preventDefault(); // chặn submit truyền thống
+                    const formData = new FormData(this);
+                    const response = await fetch("/api/login", {
+                        method: "POST",
+                        body: formData
+                    });
 
+                    const result = await response;
+
+                    if (result.ok) {
+                        Swal.fire({
+                            heightAuto: false,
+                            icon: 'success',
+                            title: await result.text(),
+                            text: 'Chào mừng bạn quay trở lại.',
+                            confirmButtonText: 'Chuyển hướng'
+                        }).then(() => {
+                            window.location.href = '/'; // chuyển sang trang login.html
+                        });
+                    } else {
+                        Swal.fire({
+                            heightAuto: false,
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: await result.text()
+                        });
+                    }
+                });
+            </script>
         </section>
     </div>
 </main>
 <div th:insert="footer :: site-footer"></div>
+<script>
+    const passwordInput = document.getElementById('passwordInput');
+    const togglePassword = document.getElementById('togglePassword');
 
+    togglePassword.addEventListener('click', () => {
+        const isHidden = passwordInput.type === 'password';
+        passwordInput.type = isHidden ? 'text' : 'password';
+        togglePassword.classList.toggle('fa-eye');
+        togglePassword.classList.toggle('fa-eye-slash');
+    });
+</script>
 </body>
 </html>
 
