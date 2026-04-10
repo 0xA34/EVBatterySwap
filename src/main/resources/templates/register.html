@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<div th:insert="header :: site-header"></div>
+<main class="auth">
+    <div class="container auth-inner">
+        <section class="auth-card" aria-labelledby="register-title">
+            <h1 id="register-title" class="auth-title">Đăng Ký</h1>
+            <p class="auth-subtitle">Tạo tài khoản của bạn</p>
+
+
+            <form id="registerForm" class="auth-form" novalidate>
+                <label class="field">
+                    <span class="label">Họ và Tên</span>
+                    <input type="text" name="fullName" placeholder="Nguyễn Văn A" required>
+                </label>
+
+                <label class="field">
+                    <span class="label">Tên Tài Khoản</span>
+                    <input type="text" name="username" placeholder="username" required>
+                </label>
+                <label class="field">
+                    <span class="label">Mật Khẩu</span>
+                    <input type="password" name="password" placeholder="••••••••" required>
+                </label>
+                <label class="field">
+                    <span class="label">Nhập Lại Mật Khẩu</span>
+                    <input type="password" name="confirmPassword" placeholder="••••••••" required>
+                </label>
+
+                <button type="submit" class="button primary full">Đăng Ký</button>
+
+                <p class="terms">
+                    Đã có tài khoản? <a class="link" href="login">Đăng nhập</a>
+                </p>
+            </form>
+        </section>
+    </div>
+</main>
+<div th:insert="footer :: site-footer"></div>
+</body>
+</html>

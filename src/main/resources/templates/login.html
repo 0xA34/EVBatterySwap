@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+<div th:insert="header :: site-header"></div>
+<main class="auth">
+    <div class="container auth-inner">
+        <section class="auth-card" aria-labelledby="login-title">
+            <h1 id="login-title" class="auth-title">Đăng Nhập</h1>
+            <p class="auth-subtitle">Vui lòng đăng nhập để tiếp tục</p>
+            <form id="loginForm" class="auth-form" novalidate>
+                <label class="field">
+                    <span class="label">Tài Khoản</span>
+                    <input type="text" name="username" placeholder="Nhập tài khoản" required>
+                </label>
+                <label class="field">
+                    <span class="label">Mật Khẩu</span>
+                    <input type="password" name="password" id="passwordInput" placeholder="Nhập mật khẩu" required>
+                    <i id="togglePassword"
+                       class="fa-solid fa-eye"
+                       style="position: absolute; right: 12px; top: 38px; cursor: pointer; color: #666;"></i>
+                </label>
+
+                <button type="submit" class="button primary full">Đăng Nhập</button>
+
+                <p class="terms">
+                    Đã chưa có tài khoản? <a class="link" href="register">Đăng ký</a>
+                </p>
+            </form>
+
+        </section>
+    </div>
+</main>
+<div th:insert="footer :: site-footer"></div>
+
+</body>
+</html>
+
