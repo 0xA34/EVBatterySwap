@@ -2,7 +2,10 @@ package com.ev.batteryswap.controllers.staff;
 
 import com.ev.batteryswap.pojo.User;
 import com.ev.batteryswap.repositories.UserRepository;
-import jakarta.servlet.http.HttpSession;
+import com.ev.batteryswap.security.JwtCookieHelper;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,22 +16,31 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/staff")
 public class StaffLoginController {
 
+    static final String COOKIE_NAME = "staff_token";
+    static final String COOKIE_PATH = "/staff";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserDetailsService userDetailsService;
+    private final JwtCookieHelper jwtCookieHelper;
 
     public StaffLoginController(
         UserRepository userRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        UserDetailsService userDetailsService,
+        JwtCookieHelper jwtCookieHelper
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userDetailsService = userDetailsService;
+        this.jwtCookieHelper = jwtCookieHelper;
     }
 
     @PostMapping("/login")
     public String processLogin(
         @RequestParam String username,
         @RequestParam String password,
-        HttpSession session,
+        HttpServletResponse response,
         RedirectAttributes redirectAttributes,
         Model model
     ) {
@@ -47,8 +59,21 @@ public class StaffLoginController {
             return "staff/login";
         }
 
-        session.setAttribute("staffUser", user.getUsername());
-        session.setAttribute("staffFullName", user.getFullName());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(
+            username
+        );
+        String token = jwtCookieHelper.generateRoleToken(
+            userDetails,
+            user.getRole(),
+            user.getUsername()
+        );
+        jwtCookieHelper.setTokenCookie(
+            response,
+            COOKIE_NAME,
+            token,
+            COOKIE_PATH
+        );
+
         redirectAttributes.addFlashAttribute(
             "loginSuccess",
             "Đăng nhập thành công! Chào mừng, " + user.getFullName() + "!"
