@@ -1,0 +1,159 @@
+.text-ghichu {
+    font-size: 14px;
+    font-style: italic;
+}
+
+.box-table .qnp-col {
+    min-width: 300px;
+}
+
+.box-table .qnp-col-bc {
+    min-width: 350px;
+}
+
+.qnp-col-stt {
+    width: 60px !important;
+    text-align: center;
+}
+
+.qnp-col-100 {
+    max-width: 100px !important;
+    min-width: 100px !important;
+}
+
+.qnp-col-120 {
+    max-width: 120px !important;
+    min-width: 120px !important;
+}
+
+.qnp-col-130 {
+    max-width: 130px !important;
+    min-width: 130px !important;
+}
+
+.qnp-col-150 {
+    max-width: 150px !important;
+    min-width: 150px !important;
+}
+
+.qnp-col-200 {
+    max-width: 200px !important;
+    min-width: 200px !important;
+}
+
+.box-table {
+    width: 100%;
+    overflow: auto;
+}
+
+.qnp-img {
+    width: 100%;
+}
+
+.qnp-word-break {
+    word-break: break-all;
+}
+
+.qnp-cbvc {
+    background-color: #ffffbe;
+}
+
+div.online-ueh {
+    background: #005f69;
+    color: #fff;
+    font-size: 13px;
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #a3a3a3;
+}
+
+div.online-tuxa {
+    background: #f26f33;
+    color: #fff;
+    font-size: 13px;
+    padding: 5px;
+    border-radius: 3px;
+    border: 1px solid #a3a3a3;
+}
+
+.bg-qnp {
+    background-image: url(banner.jpg);
+    background-repeat: no-repeat;
+    background-position: center;
+    /* background-size: contain; */
+}
+
+.login-btn {
+    background: #005f69;
+    color: #fff;
+    padding: 10px 0;
+}
+
+.login-btn:hover {
+    background: #f26f33;
+    color: #fff;
+}
+
+.text-small {
+    font-size: 0.8rem;
+}
+.text-small a, .text-small label {
+    cursor: pointer;
+}
+
+.text-small a {
+    float: right;
+    color: #212529;
+    text-decoration: none;
+}
+.text-small a:hover, .text-small label:hover {
+    color: #f26f33!important;
+}
+#qr {
+    position: relative;
+}
+.qnp-qrcode img {
+    border: 1px solid #808080;
+    padding: 10px;
+    border-radius: 10px;
+    margin: auto;
+}
+
+.box-refresh-token {
+    position: absolute;
+    top: 35%;
+    left: 35%;
+    z-index: 1000;
+    display: none;
+}
+
+.token-expired .box-refresh-token {
+    display: block;
+}
+
+.token-expired .qnp-qrcode img {
+    opacity: 0.3;
+}
+
+
+html,
+body,
+#login-page,
+#login-page .login-page {
+    height: 100% !important;
+    font-size: 1.05rem;
+}
+
+.text-title {
+    font-size: 1.05rem;
+}
+
+@media only screen and (max-width: 600px) {
+    html,
+    body,
+    #login-page,
+    #login-page .login-page,
+    .text-title {
+        font-size: 0.9rem;
+    }
+}
