@@ -16,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -49,8 +51,8 @@ public class AuthController {
             @RequestParam String password,
             HttpServletResponse response
     ) {
+        Map<String, Object> resp = new HashMap<>();
         User user = userRepository.findByUsername(username);
-
         if (
                 user == null ||
                         !passwordEncoder.matches(password, user.getPassword())
@@ -68,6 +70,11 @@ public class AuthController {
         );
 
         if (user.getRole().equals("ADMIN")) {
+
+
+            resp.put("message", "Đăng Nhập Thành Công");
+            resp.put("role", "ADMIN");
+            resp.put("status", 200);
             COOKIE_NAME = "admin_token";
             COOKIE_PATH = "/admin";
             jwtCookieHelper.setTokenCookie(
@@ -76,9 +83,14 @@ public class AuthController {
                     token,
                     COOKIE_PATH
             );
-            return ResponseEntity.ok("Đăng Nhập Thành Công");
+            return ResponseEntity.ok(resp);
         }
         else if (user.getRole().equals("STAFF")) {
+
+            resp.put("message", "Đăng Nhập Thành Công");
+            resp.put("role", "STAFF");
+            resp.put("status", 200);
+
             COOKIE_NAME = "staff_token";
             COOKIE_PATH = "/staff";
             jwtCookieHelper.setTokenCookie(
@@ -87,9 +99,14 @@ public class AuthController {
                     token,
                     COOKIE_PATH
             );
-            return ResponseEntity.ok("Đăng Nhập Thành Công");
+            return ResponseEntity.ok(resp);
         }
         else if (user.getRole().equals("DRIVER")) {
+
+            resp.put("message", "Đăng Nhập Thành Công");
+            resp.put("role", "DRIVER");
+            resp.put("status", 200);
+
             COOKIE_NAME = "driver_token";
             COOKIE_PATH = "/";
             jwtCookieHelper.setTokenCookie(
@@ -98,10 +115,13 @@ public class AuthController {
                     token,
                     COOKIE_PATH
             );
-            return ResponseEntity.ok("Đăng Nhập Thành Công");
+            return ResponseEntity.ok(resp);
         }
         else {
-            return ResponseEntity.badRequest().body("Đăng Nhập Thất Bại");
+            resp.put("message", "Đăng Nhập Thất Bại");
+            resp.put("token", "None");
+            resp.put("status", 400);
+            return ResponseEntity.badRequest().body(resp);
         }
     }
 

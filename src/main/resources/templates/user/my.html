@@ -12,9 +12,9 @@
 </head>
 <body>
 
-<div th:insert="user/header-user :: site-header-user"></div>
+<div th:replace="~{user/fragments/header :: site-header-user}"></div>
 
-<script th:src="@{/js/notifications.js}"></script>
+<!--<script th:src="@{/js/notifications.js}"></script>-->
 
 
 <main class="landing">
@@ -68,6 +68,6 @@
         </div>
     </section>
 </main>
-<div th:insert="footer :: site-footer"></div>
+<div th:replace="~{user/fragments/footer :: site-footer}"></div>
 </body>
 </html>

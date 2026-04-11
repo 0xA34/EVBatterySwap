@@ -112,24 +112,36 @@
                     body: formData
                 });
 
-                const result = await response;
+                const result = await response.json();
 
-                if (result.ok) {
-                    Swal.fire({
-                        heightAuto: false,
-                        icon: 'success',
-                        title: await result.text(),
-                        text: 'Chào mừng bạn quay trở lại.',
-                        confirmButtonText: 'Chuyển hướng'
-                    }).then(() => {
-                        window.location.href = '/admin/dashboard';
-                    });
+                if (response.ok) { // Kiểm tra response.ok (status 200-299)
+                    if (result.role === 'ADMIN') {
+                        Swal.fire({
+                            heightAuto: false,
+                            icon: 'success',
+                            title: result.message, // Lấy message từ JSON
+                            text: 'Chào mừng bạn quay trở lại.',
+                            confirmButtonText: 'Chuyển hướng'
+                        }).then(() => {
+                            window.location.href = '/my';
+                        });
+                    } else {
+                        // Trường hợp đăng nhập đúng user/pass nhưng sai vai trò (Role)
+                        Swal.fire({
+                            heightAuto: false,
+                            icon: 'warning',
+                            title: 'Từ chối truy cập',
+                            text: 'Tài khoản của bạn không có quyền.',
+                            confirmButtonText: 'Đã hiểu'
+                        });
+                    }
                 } else {
+                    // Trường hợp sai username/password hoặc lỗi server
                     Swal.fire({
                         heightAuto: false,
                         icon: 'error',
                         title: 'Lỗi',
-                        text: await result.text()
+                        text: 'Đăng nhập thất bại'
                     });
                 }
             });
