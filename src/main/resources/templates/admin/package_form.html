@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Form Gói Thuê')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+  <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+  <aside th:replace="~{admin/fragments/_header :: sidebar('packages')}"></aside>
+  <div class="content-wrapper">
+    <section class="content">
+      <div class="container-fluid">
+        <div class="card card-primary">
+          <form th:action="@{/admin/packages}" th:object="${package}" method="post">
+            <input type="hidden" th:field="*{id}" />
+            <div class="card-body">
+              <div class="form-group"><label>Tên gói</label><input type="text" class="form-control" th:field="*{name}" required></div>
+              <div class="form-group"><label>Mô tả</label><textarea class="form-control" rows="3" th:field="*{description}"></textarea></div>
+              <div class="row">
+                <div class="col-md-6"><div class="form-group"><label>Giá (VND)</label><input type="number" class="form-control" th:field="*{price}" required></div></div>
+                <div class="col-md-6"><div class="form-group"><label>Thời gian (ngày)</label><input type="number" class="form-control" th:field="*{durationDays}" required></div></div>
+              </div>
+              <div class="form-group"><label>Trạng thái</label><select class="form-control" th:field="*{status}"><option value="ACTIVE">Hoạt động</option><option value="INACTIVE">Không hoạt động</option></select></div>
+            </div>
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary">Lưu</button>
+              <a th:href="@{/admin/packages}" class="btn btn-secondary">Hủy</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

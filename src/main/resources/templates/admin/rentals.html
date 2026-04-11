@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Lịch sử Thuê Gói')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+  <aside th:replace="~{admin/fragments/_header :: sidebar('rentals')}"></aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <div class="container-fluid"><h1>Lịch sử Thuê Gói</h1></div>
+    </section>
+
+    <section class="content">
+      <div class="container-fluid">
+        <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+
+        <div class="card">
+          <div class="card-body">
+            <form th:action="@{/admin/rentals}" method="get" class="row">
+              <div class="col-md-8">
+                <div class="form-group">
+                  <label>Tìm kiếm:</label>
+                  <input type="text" name="search" class="form-control" placeholder="Tìm theo tên khách hàng hoặc tên gói..." th:value="${search}">
+                </div>
+              </div>
+              <div class="col-md-4 align-self-end">
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary"><i class="fas fa-search mr-1"></i> Lọc</button>
+                  <a th:href="@{/admin/rentals}" class="btn btn-secondary"> <i class="fas fa-times mr-1"></i> Xóa</a>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Danh sách Biên lai (<span th:text="${rentalPage.totalElements}">0</span>)</h3>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped table-hover">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Khách hàng</th>
+                  <th>Tên gói</th>
+                  <th>Số tiền</th>
+                  <th>Ngày bắt đầu</th>
+                  <th>Ngày hết hạn</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${rentalPage.content}">
+                  <td th:text="${r.id}">1</td>
+                  <td th:text="${r.user?.fullName} ?: 'N/A'">Nguyễn Văn A</td>
+                  <td th:text="${r.packageField?.name} ?: 'N/A'">Gói 30 ngày</td>
+                  <td class="text-right" th:text="${#numbers.formatDecimal(r.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">270,000 đ</td>
+                  <td th:text="${r.startDate != null ? #temporals.format(r.startDate, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                  <td th:text="${r.endDate != null ? #temporals.format(r.endDate, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                  <td>
+                    <span class="badge" th:classappend="${r.status == 'ACTIVE' ? 'badge-success' : 'badge-danger'}" th:text="${r.status}">ACTIVE</span>
+                  </td>
+                  <td>
+                    <a th:href="@{/admin/rentals/delete/{id}(id=${r.id})}" class="btn btn-danger btn-sm" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa biên lai này?');"><i class="fas fa-trash"></i></a>
+                  </td>
+                </tr>
+                <tr th:if="${rentalPage.empty}">
+                  <td colspan="8" class="text-center">Không có biên lai nào.</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card-footer clearfix" th:if="${rentalPage.totalPages > 1}">
+            <ul class="pagination pagination-sm m-0 float-right">
+              <li class="page-item" th:classappend="${rentalPage.first} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/rentals(page=${rentalPage.number - 1}, search=${search})}">Trước</a>
+              </li>
+              <li class="page-item" th:each="i : ${#numbers.sequence(0, rentalPage.totalPages - 1)}" th:classappend="${i == rentalPage.number} ? 'active'">
+                <a class="page-link" th:href="@{/admin/rentals(page=${i}, search=${search})}" th:text="${i + 1}">1</a>
+              </li>
+              <li class="page-item" th:classappend="${rentalPage.last} ? 'disabled'">
+                <a class="page-link" th:href="@{/admin/rentals(page=${rentalPage.number + 1}, search=${search})}">Sau</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

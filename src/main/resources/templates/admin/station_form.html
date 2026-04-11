@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header(${pageTitle})}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('stations')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1 th:text="${pageTitle}"></h1></div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/admin/stations}">Quản lý Trạm</a></li>
+                            <li class="breadcrumb-item active" th:text="${station.id == null ? 'Thêm Mới' : 'Chỉnh Sửa'}"></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card card-primary">
+                    <div class="card-header"><h3 class="card-title">Thông tin trạm</h3></div>
+                    <form th:action="@{/admin/stations}" th:object="${station}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="name">Tên trạm</label>
+                                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="address">Địa chỉ</label>
+                                <textarea class="form-control" id="address" rows="3" th:field="*{address}" required></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6"><div class="form-group"><label for="quan">Quận/Huyện</label><input type="text" class="form-control" id="quan" th:field="*{quan}"></div></div>
+                                <div class="col-md-6"><div class="form-group"><label for="province">Tỉnh/Thành phố</label><input type="text" class="form-control" id="province" th:field="*{province}"></div></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Trạng thái</label>
+                                <select class="form-control" id="status" th:field="*{status}">
+                                    <option value="ACTIVE">Hoạt động</option>
+                                    <option value="MAINTENANCE">Bảo trì</option>
+                                    <option value="INACTIVE">Không hoạt động</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                            <a th:href="@{/admin/stations}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

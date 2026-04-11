@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Chi tiết Ticket')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('tickets')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid"><h1>Chi tiết Ticket #<span th:text="${ticket.id}"></span></h1></div>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+                <div class="card">
+                    <div class="card-body">
+                        <h4 th:text="${ticket.subject}"></h4>
+                        <div class="bg-light p-3 rounded mb-3" style="white-space: pre-wrap;" th:text="${ticket.message}"></div>
+                        <hr/>
+                        <form th:action="@{/admin/tickets/update/{id}(id=${ticket.id})}" th:object="${ticket}" method="post">
+                            <div class="row">
+                                <div class="col-md-6"><div class="form-group"><label>Trạng thái</label><select th:field="*{status}" class="form-control"><option value="OPEN">Mở</option><option value="IN_PROGRESS">Đang xử lý</option><option value="RESOLVED">Đã giải quyết</option><option value="CLOSED">Đã đóng</option></select></div></div>
+                                <div class="col-md-6"><div class="form-group"><label>Độ ưu tiên</label><select th:field="*{priority}" class="form-control"><option value="LOW">Thấp</option><option value="MEDIUM">Trung bình</option><option value="HIGH">Cao</option><option value="URGENT">Khẩn cấp</option></select></div></div>
+                            </div>
+                            <div class="form-group"><label>Phản hồi của Admin</label><textarea th:field="*{adminResponse}" class="form-control" rows="4" placeholder="Nhập phản hồi..."></textarea></div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Cập nhật</button>
+                            <a th:href="@{/admin/tickets}" class="btn btn-secondary">Quay lại danh sách</a>
+                            <a th:href="@{/admin/tickets/delete/{id}(id=${ticket.id})}" class="btn btn-danger float-right" onclick="return confirm('Bạn có chắc chắn muốn xóa ticket này không?')"><i class="fas fa-trash"></i> Xóa</a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

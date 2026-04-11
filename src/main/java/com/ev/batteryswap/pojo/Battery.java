@@ -21,6 +21,10 @@ public class Battery {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "current_station_id")
+    private Station station;
+
     @Column(name = "serial_number", nullable = false, length = 100)
     private String serialNumber;
 
@@ -65,6 +69,7 @@ public class Battery {
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "updated_at")
     private Instant updatedAt;
+
 
 
 }

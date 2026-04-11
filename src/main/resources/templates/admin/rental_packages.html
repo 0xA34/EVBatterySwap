@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Quản lý Gói Thuê')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('packages')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>Quản lý Gói thuê Pin</h1>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+                <div class="row">
+                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3 th:text="${stats.get('total_packages') ?: 0}">0</h3><p>Tổng gói</p></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3 th:text="${stats.get('active_packages') ?: 0}">0</h3><p>Hoạt động</p></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3 th:text="${#numbers.formatDecimal(stats.get('avg_price'), 0, 'COMMA', 0, 'POINT')}">0</h3><p>Giá TB (VND)</p></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-primary"><div class="inner"><h3 th:text="${#numbers.formatDecimal(stats.get('avg_duration'), 1, 'COMMA', 1, 'POINT')}">0</h3><p>Thời gian TB (ngày)</p></div></div></div>
+                </div>
+                <div class="row mb-3"><div class="col-12"><a th:href="@{/admin/packages/new}" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm gói mới</a></div></div>
+                <div class="card">
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead><tr><th>ID</th><th>Tên</th><th>Giá (VND)</th><th>Thời hạn</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr></thead>
+                            <tbody>
+                            <tr th:each="p : ${packagePage.content}">
+                                <td th:text="${p.id}"></td>
+                                <td th:text="${p.name}"></td>
+                                <td th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}"></td>
+                                <td th:text="${p.durationDays} + ' ngày'"></td>
+                                <td><span class="badge" th:classappend="${p.status == 'ACTIVE' ? 'badge-success' : 'badge-danger'}" th:text="${p.status}"></span></td>
+                                <td th:text="${p.createdAt != null ? #temporals.format(p.createdAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                <td>
+                                    <a th:href="@{/admin/packages/edit/{id}(id=${p.id})}" class="btn btn-warning btn-sm">Sửa</a>
+                                    <a th:href="@{/admin/packages/delete/{id}(id=${p.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc không?')">Xóa</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

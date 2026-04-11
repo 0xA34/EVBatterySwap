@@ -160,4 +160,14 @@ public class UserService implements IUserService {
     public User findById(Integer userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
+    @Override
+    public List<User> getStaffByStation(Integer stationId) {
+        return userRepository.findByStation_IdAndRole(stationId, "STAFF");
+    }
+
+    @Override
+    public List<User> getUsersByRole(String role) {
+        return userRepository.findByRole(role);
+    }
 }

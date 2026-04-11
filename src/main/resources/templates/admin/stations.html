@@ -12,7 +12,7 @@
                     <div class="col-sm-6"><h1>Quản lý Trạm</h1></div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a th:href="@{/templates/admin}">Home</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
                             <li class="breadcrumb-item active">Quản lý Trạm</li>
                         </ol>
                     </div>
@@ -21,21 +21,35 @@
         </section>
         <section class="content">
             <div class="container-fluid">
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
                 <div class="row">
-                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>0</h3><p>Tổng trạm</p></div><div class="icon"><i class="fas fa-map-marker-alt"></i></div></div></div>
-                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>0</h3><p>Hoạt động</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
-                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>0</h3><p>Bảo trì</p></div><div class="icon"><i class="fas fa-tools"></i></div></div></div>
-                    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>0</h3><p>Không hoạt động</p></div><div class="icon"><i class="fas fa-times-circle"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3 th:text="${stats.get('total_stations') ?: 0}">0</h3><p>Tổng trạm</p></div><div class="icon"><i class="fas fa-map-marker-alt"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3 th:text="${stats.get('active_stations') ?: 0}">0</h3><p>Hoạt động</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3 th:text="${stats.get('maintenance_stations') ?: 0}">0</h3><p>Bảo trì</p></div><div class="icon"><i class="fas fa-tools"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3 th:text="${stats.get('inactive_stations') ?: 0}">0</h3><p>Không hoạt động</p></div><div class="icon"><i class="fas fa-times-circle"></i></div></div></div>
                 </div>
-                <div class="row mb-3"><div class="col-12"><a class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm trạm mới</a></div></div>
+                <div class="row mb-3"><div class="col-12"><a th:href="@{/admin/stations/new}" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm trạm mới</a></div></div>
                 <div class="card">
-                    <div class="card-header"><h3 class="card-title">Danh sách Trạm</h3></div>
+                    <div class="card-header"><h3 class="card-title">Danh sách Trạm (<span th:text="${stationPage.totalElements}">0</span>)</h3></div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-bordered table-striped table-hover">
                                 <thead><tr><th>ID</th><th>Tên trạm</th><th>Địa chỉ</th><th>Trạng thái</th><th>Ngày tạo</th><th>Cập nhật cuối</th><th>Thao tác</th></tr></thead>
                                 <tbody>
-                                <tr class="text-center">Không tìm thấy trạm nào.</td></tr>
+                                <tr th:each="st : ${stationPage.content}">
+                                    <td><strong th:text="${st.id}">1</strong></td>
+                                    <td th:text="${st.name}">Trạm A</td>
+                                    <td th:text="${st.address}">123 Đường ABC</td>
+                                    <td><span class="badge" th:classappend="${st.status == 'ACTIVE' ? 'badge-success' : (st.status == 'MAINTENANCE' ? 'badge-warning' : 'badge-danger')}" th:text="${st.status}">ACTIVE</span></td>
+                                    <td th:text="${st.createdAt != null ? #temporals.format(st.createdAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                    <td th:text="${st.updatedAt != null ? #temporals.format(st.updatedAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                    <td>
+                                        <a th:href="@{/admin/stations/{id}(id=${st.id})}" class="btn btn-info btn-sm" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                                        <a th:href="@{/admin/stations/edit/{id}(id=${st.id})}" class="btn btn-warning btn-sm" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
+                                        <a th:href="@{/admin/stations/delete/{id}(id=${st.id})}" class="btn btn-danger btn-sm" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa trạm này?');"><i class="fas fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${stationPage.empty}"><td colspan="5" class="text-center">Không tìm thấy trạm nào.</td></tr>
                                 </tbody>
                             </table>
                         </div>

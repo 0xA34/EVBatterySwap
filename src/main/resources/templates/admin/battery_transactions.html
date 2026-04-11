@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{admin/fragments/_header :: common_header('Quản lý Giao dịch Pin')}"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('transactions')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid"><div class="row mb-2"><div class="col-sm-6"><h1>Quản lý Giao dịch Pin</h1></div><div class="col-sm-6"><ol class="breadcrumb float-sm-right"><li class="breadcrumb-item"><a th:href="@{/admin/batteries}">Home</a></li><li class="breadcrumb-item active">Giao dịch Pin</li></ol></div></div></div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+                <div class="row">
+                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3 th:text="${stats.get('total_transactions') ?: 0}">0</h3><p>Tổng giao dịch</p></div><div class="icon"><i class="fas fa-exchange-alt"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3 th:text="${stats.get('completed_transactions') ?: 0}">0</h3><p>Hoàn thành</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3 th:text="${stats.get('pending_transactions') ?: 0}">0</h3><p>Chờ xử lý</p></div><div class="icon"><i class="fas fa-clock"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3 th:text="${stats.get('failed_transactions') ?: 0}">0</h3><p>Thất bại</p></div><div class="icon"><i class="fas fa-times-circle"></i></div></div></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Bộ lọc</h3></div>
+                    <div class="card-body">
+                        <form id="filterForm" th:action="@{/admin/transactions}" method="get" class="row">
+                            <div class="col-md-3"><div class="form-group"><label>Trạm:</label>
+                                <select name="stationId" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option th:each="station : ${stations}" th:value="${station.id}" th:text="${station.name}" th:selected="${station.id == selectedStationId}"></option>
+                                </select>
+                            </div></div>
+                            <div class="col-md-3"><div class="form-group"><label>Trạng thái TT:</label>
+                                <select name="paymentStatus" class="form-control">
+                                    <option value="">Tất cả</option>
+                                    <option value="COMPLETED" th:selected="${'COMPLETED' == selectedPaymentStatus}">Hoàn thành</option>
+                                    <option value="PENDING" th:selected="${'PENDING' == selectedPaymentStatus}">Chờ xử lý</option>
+                                    <option value="FAILED" th:selected="${'FAILED' == selectedPaymentStatus}">Thất bại</option>
+                                </select>
+                            </div></div>
+                            <div class="col-md-4"><div class="form-group"><label>Tìm kiếm:</label><input type="text" name="search" class="form-control" placeholder="Tìm theo ID giao dịch..." th:value="${search}"></div></div>
+                            <div class="col-md-2 align-self-end"><div class="form-group"><button type="submit" class="btn btn-primary"><i class="fas fa-search mr-1"></i> Lọc</button><a th:href="@{/admin/transactions}" class="btn btn-secondary"> <i class="fas fa-times mr-1"></i> Xóa</a></div></div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <a th:href="@{/admin/transactions/new}" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Tạo giao dịch mới</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Danh sách Giao dịch (<span th:text="${transactionPage.totalElements}">0</span>)</h3></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Trạm</th>
+                                    <th>Pin cũ (Vào)</th>
+                                    <th>Pin mới (Ra)</th>
+                                    <th>Số tiền</th> <th>PTTT</th>    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                    <th style="width: 100px;">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="tx : ${transactionPage.content}">
+                                    <td th:text="${tx.id}">1</td>
+                                    <td th:text="${tx.station?.name} ?: 'N/A'">Trạm A</td>
+
+                                    <td><code class="text-danger" th:text="${tx.batteryIn?.serialNumber} ?: 'N/A'">PIN_CU</code></td>
+                                    <td><code class="text-success" th:text="${tx.batteryOut?.serialNumber} ?: 'N/A'">PIN_MOI</code></td>
+
+                                    <td class="text-right"><strong><span th:text="${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')}"></span> đ</strong></td>
+
+                                    <td>
+                                        <span class="badge badge-info" th:if="${tx.paymentMethod == 'CASH'}"><i class="fas fa-money-bill-wave mr-1"></i> Tiền mặt</span>
+                                        <span class="badge badge-primary" th:if="${tx.paymentMethod == 'CARD'}"><i class="far fa-credit-card mr-1"></i> Thẻ</span>
+                                        <span class="badge badge-warning" th:if="${tx.paymentMethod == 'WALLET'}"><i class="fas fa-wallet mr-1"></i> Ví điện tử</span>
+                                        <span class="badge badge-secondary" th:if="${tx.paymentMethod != 'CASH' and tx.paymentMethod != 'CARD' and tx.paymentMethod != 'WALLET'}" th:text="${tx.paymentMethod}">OTHER</span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${#strings.equalsIgnoreCase(tx.paymentStatus, 'COMPLETED')} ? 'badge-success' :
+                                              (${#strings.equalsIgnoreCase(tx.paymentStatus, 'PENDING')} ? 'badge-warning' : 'badge-danger')"
+                                              th:text="${tx.paymentStatus}">COMPLETED</span>
+                                    </td>
+                                    <td th:text="${tx.createdAt != null ? #temporals.format(tx.createdAt, 'dd-MM-yyyy HH:mm') : 'N/A'}">--</td>
+                                    <td>
+                                        <a th:href="@{/admin/transactions/edit/{id}(id=${tx.id})}" class="btn btn-warning btn-sm" title="Sửa"><i class="fas fa-pen"></i></a>
+                                        <a th:href="@{/admin/transactions/delete/{id}(id=${tx.id})}" class="btn btn-danger btn-sm" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa giao dịch này?');"><i class="fas fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${transactionPage.empty}">
+                                    <td colspan="9" class="text-center">Không có giao dịch nào.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer clearfix" th:if="${transactionPage.totalPages > 1}">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

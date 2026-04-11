@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Quản lý Tồn kho Pin')}"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+
+    <aside th:replace="~{admin/fragments/_header :: sidebar('batteries')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6"><h1 th:text="${pageTitle ?: 'Quản lý Tồn kho Pin'}">Quản lý Tồn kho Pin</h1></div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
+                            <li class="breadcrumb-item active">Tồn kho Pin</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+
+                <div class="row">
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-info"><div class="inner"><h3 th:text="${stats.total}">0</h3><p>Tổng pin</p></div><div class="icon"><i class="fas fa-battery-full"></i></div></div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-success"><div class="inner"><h3 th:text="${stats.available}">0</h3><p>Sẵn sàng</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-primary"><div class="inner"><h3 th:text="${stats.charging}">0</h3><p>Đang sạc</p></div><div class="icon"><i class="fas fa-charging-station"></i></div></div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-warning"><div class="inner"><h3 th:text="${stats.maintenance}">0</h3><p>Bảo dưỡng</p></div><div class="icon"><i class="fas fa-tools"></i></div></div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-danger"><div class="inner"><h3 th:text="${stats.empty}">0</h3><p>Hết pin</p></div><div class="icon"><i class="fas fa-battery-empty"></i></div></div>
+                    </div>
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-secondary"><div class="inner"><h3 th:text="${stats.rented}">0</h3><p>Đang thuê</p></div><div class="icon"><i class="fas fa-hand-holding"></i></div></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title">Bộ lọc</h3></div>
+                    <div class="card-body">
+                        <form id="filterForm" th:action="@{/admin/batteries}" method="get" class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="filterStationId">Trạm:</label>
+                                    <select name="stationId" id="filterStationId" class="form-control">
+                                        <option value="">Tất cả trạm</option>
+                                        <option th:each="station : ${stations}" th:value="${station.id}" th:text="${station.name}" th:selected="${station.id == selectedStationId}"></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="filterStatus">Trạng thái:</label>
+                                    <select name="status" id="filterStatus" class="form-control">
+                                        <option value="">Tất cả</option>
+                                        <option value="AVAILABLE" th:selected="${'AVAILABLE' == selectedStatus}">Sẵn sàng</option>
+                                        <option value="CHARGING" th:selected="${'CHARGING' == selectedStatus}">Đang sạc</option>
+                                        <option value="MAINTENANCE" th:selected="${'MAINTENANCE' == selectedStatus}">Bảo dưỡng</option>
+                                        <option value="EMPTY" th:selected="${'EMPTY' == selectedStatus}">Pin trống</option>
+                                        <option value="RENTED" th:selected="${'RENTED' == selectedStatus}">Đang thuê</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="filterSearch">Tìm kiếm:</label>
+                                    <input type="text" name="search" id="filterSearch" class="form-control" placeholder="Tìm theo serial..." th:value="${search}">
+                                </div>
+                            </div>
+                            <div class="col-md-2 align-self-end">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-search mr-1"></i> Lọc</button>
+                                    <a th:href="@{/admin/batteries}" class="btn btn-secondary"><i class="fas fa-times mr-1"></i> Xóa</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <a th:href="@{/admin/batteries/new}" class="btn btn-primary"><i class="fas fa-plus mr-2"></i>Thêm pin mới</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header"><h3 class="card-title" id="tableTitle">Danh sách Pin (<span th:text="${batteryPage.totalElements}">0</span>)</h3></div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Serial</th>
+                                    <th>Model</th>
+                                    <th>Dung lượng</th>
+                                    <th>Sạc (%)</th>
+                                    <th>SOH (%)</th>
+                                    <th>Trạm</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Cập nhật cuối</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="battery : ${batteryPage.content}">
+                                    <td><strong th:text="${battery.id}">1</strong></td>
+                                    <td><code th:text="${battery.serialNumber}">BAT001</code></td>
+                                    <td th:text="${battery.model}">Model X</td>
+                                    <td th:text="${battery.capacityKwh} + ' kWh'">50 kWh</td>
+
+                                    <td>
+                     <span th:classappend="${battery.currentChargePercentage gt 80 ? 'text-success' : (battery.currentChargePercentage gt 30 ? 'text-warning' : 'text-danger')}"
+                           th:text="${battery.currentChargePercentage} + '%'">
+                     </span>
+                                    </td>
+
+                                    <td th:text="${battery.healthPercentage} + '%'">98%</td>
+                                    <td th:text="${battery.station?.name ?: 'N/A'}">Trạm A</td>
+                                    <td th:text="${battery.createdAt != null ? #temporals.format(battery.createdAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                    <td th:text="${battery.updatedAt != null ? #temporals.format(battery.updatedAt, 'dd-MM-yyyy HH:mm') : 'N/A'}"></td>
+                                    <td>
+                    <span class="badge"
+                          th:classappend="${battery.status == 'AVAILABLE' ? 'badge-success' :
+                                           battery.status == 'CHARGING' ? 'badge-primary' :
+                                           battery.status == 'MAINTENANCE' ? 'badge-warning' :
+                                           battery.status == 'EMPTY' ? 'badge-danger' : 'badge-secondary'}">
+                        <span th:if="${battery.status == 'AVAILABLE'}">Sẵn sàng</span>
+                        <span th:if="${battery.status == 'CHARGING'}">Đang sạc</span>
+                        <span th:if="${battery.status == 'MAINTENANCE'}">Bảo dưỡng</span>
+                        <span th:if="${battery.status == 'EMPTY'}">Trống</span>
+                        <span th:if="${battery.status == 'RENTED'}">Đang thuê</span>
+                    </span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/admin/batteries/edit/{id}(id=${battery.id})}" class="btn btn-warning btn-sm" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
+                                        <a th:href="@{/admin/batteries/delete/{id}(id=${battery.id})}" class="btn btn-danger btn-sm" title="Xóa"
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa pin này không?');"><i class="fas fa-trash"></i></a>
+
+                                        <button th:if="${battery.status == 'MAINTENANCE'}"
+                                                class="btn btn-success btn-sm"
+                                                title="Hoàn tất bảo trì / Sửa xong"
+                                                th:data-id="${battery.id}"
+                                                th:data-serial="${battery.serialNumber}"
+                                                onclick="openFinishModal(this.getAttribute('data-id'), this.getAttribute('data-serial'))">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr th:if="${batteryPage.empty}">
+                                    <td colspan="11" class="text-center">Không tìm thấy pin nào.</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer clearfix" th:if="${batteryPage.totalPages > 1}">
+                        <div class="row">
+                            <div class="col-md-6 text-muted">
+                                Hiển thị <span th:text="${batteryPage.pageable.offset + 1}">1</span>-<span th:text="${batteryPage.pageable.offset + batteryPage.numberOfElements}">10</span> / <span th:text="${batteryPage.totalElements}">100</span> pin
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="pagination pagination-sm m-0 float-right">
+                                    <li class="page-item" th:classappend="${batteryPage.first} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/admin/batteries(page=${batteryPage.number - 1}, stationId=${selectedStationId}, status=${selectedStatus}, search=${search})}">Trước</a>
+                                    </li>
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, batteryPage.totalPages - 1)}" th:classappend="${i == batteryPage.number} ? 'active'">
+                                        <a class="page-link" th:href="@{/admin/batteries(page=${i}, stationId=${selectedStationId}, status=${selectedStatus}, search=${search})}" th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${batteryPage.last} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/admin/batteries(page=${batteryPage.number + 1}, stationId=${selectedStationId}, status=${selectedStatus}, search=${search})}">Sau</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+
+<div class="modal fade" id="finishModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form th:action="@{/admin/maintenance/complete}" method="post">
+                <div class="modal-header bg-success">
+                    <h5 class="modal-title text-white">Xác nhận đã sửa chữa xong</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="batteryId" id="finishBatteryId">
+                    <p>Xác nhận đưa pin <strong id="finishBatterySerial"></strong> trở lại hoạt động?</p>
+
+                    <div class="form-group">
+                        <label>Chi phí sửa chữa (VNĐ):</label>
+                        <input type="number" name="cost" class="form-control" value="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi chú sửa chữa:</label>
+                        <textarea name="notes" class="form-control" rows="2" placeholder="Ví dụ: Đã thay vỏ mới..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Xác nhận & Kích hoạt Pin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openFinishModal(id, serial) {
+        document.getElementById('finishBatteryId').value = id;
+        document.getElementById('finishBatterySerial').innerText = serial;
+        $('#finishModal').modal('show');
+    }
+</script>
+
+</body>
+</html>

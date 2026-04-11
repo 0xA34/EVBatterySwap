@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Chi tiết Trạm')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('stations')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Trạm: <span class="text-primary" th:text="${station.name}"></span></h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/stations}">Quản lý Trạm</a></li>
+                            <li class="breadcrumb-item active">Chi tiết</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card card-primary card-outline">
+                            <div class="card-body box-profile">
+                                <div class="text-center mb-3">
+                                    <i class="fas fa-charging-station fa-3x text-secondary"></i>
+                                </div>
+                                <h3 class="profile-username text-center" th:text="${station.name}">VinFast Station</h3>
+                                <p class="text-muted text-center" th:text="${station.address}">Địa chỉ...</p>
+                                <ul class="list-group list-group-unbordered mb-3">
+                                    <li class="list-group-item">
+                                        <b>Trạng thái</b> <span class="float-right badge" th:classappend="${station.status == 'ACTIVE' ? 'badge-success' : 'badge-danger'}" th:text="${station.status}">ACTIVE</span>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <b>Tổng số Pin</b> <a class="float-right" th:text="${batteryStats.get('total')}">0</a>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <b>Pin Sẵn sàng</b> <a class="float-right text-success" th:text="${batteryStats.get('available')}">0</a>
+                                    </li>
+                                </ul>
+                                <a th:href="@{/admin/stations/edit/{id}(id=${station.id})}" class="btn btn-warning btn-block"><b><i class="fas fa-edit"></i> Chỉnh sửa thông tin</b></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header p-2">
+                                <ul class="nav nav-pills">
+                                    <li class="nav-item"><a class="nav-link active" href="#staff" data-toggle="tab">Nhân viên phụ trách</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="#batteries" data-toggle="tab">Danh sách Pin tại trạm</a></li>
+                                </ul>
+                            </div>
+                            <div class="card-body">
+                                <div class="tab-content">
+                                    <div class="active tab-pane" id="staff">
+                                        <table class="table table-striped">
+                                            <thead><tr><th>ID</th><th>Họ tên</th><th>Username</th><th>SĐT</th><th>Trạng thái</th></tr></thead>
+                                            <tbody>
+                                            <tr th:each="staff : ${staffList}">
+                                                <td th:text="${staff.id}">1</td>
+                                                <td th:text="${staff.fullName}">Nguyễn Văn A</td>
+                                                <td th:text="${staff.username}">user1</td>
+                                                <td th:text="${staff.phoneNumber}">098...</td>
+                                                <td><span class="badge badge-success" th:text="${staff.status}">ACTIVE</span></td>
+                                            </tr>
+                                            <tr th:if="${#lists.isEmpty(staffList)}">
+                                                <td colspan="5" class="text-center text-muted">Chưa có nhân viên nào được phân công tại trạm này.</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <div class="tab-pane" id="batteries">
+                                        <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                            <table class="table table-bordered table-head-fixed">
+                                                <thead><tr><th>Serial</th><th>Model</th><th>Sạc (%)</th><th>Trạng thái</th></tr></thead>
+                                                <tbody>
+                                                <tr th:each="bat : ${batteries}">
+                                                    <td><code th:text="${bat.serialNumber}"></code></td>
+                                                    <td th:text="${bat.model}"></td>
+                                                    <td>
+                                                        <div class="progress progress-xs">
+                                                            <div class="progress-bar" th:classappend="${bat.currentChargePercentage > 80 ? 'bg-success' : (bat.currentChargePercentage > 30 ? 'bg-warning' : 'bg-danger')}"
+                                                                 th:style="'width: ' + ${bat.currentChargePercentage} + '%'"></div>
+                                                        </div>
+                                                        <small th:text="${bat.currentChargePercentage} + '%'"></small>
+                                                    </td>
+                                                    <td><span class="badge" th:classappend="${bat.status == 'AVAILABLE' ? 'badge-success' : 'badge-warning'}" th:text="${bat.status}"></span></td>
+                                                </tr>
+                                                <tr th:if="${#lists.isEmpty(batteries)}">
+                                                    <td colspan="4" class="text-center">Hiện không có pin nào tại trạm.</td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

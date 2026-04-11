@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header(${battery.id == null ? 'Thêm Pin Mới' : 'Chỉnh Sửa Pin'})}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('dashboard')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1 th:text="${battery.id == null ? 'Thêm Pin Mới' : 'Chỉnh Sửa Pin'}"></h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}">Home</a></li>
+                            <li class="breadcrumb-item"><a th:href="@{/admin/batteries}">Tồn kho Pin</a></li>
+                            <li class="breadcrumb-item active" th:text="${battery.id == null ? 'Thêm Mới' : 'Chỉnh Sửa'}"></li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Thông tin pin</h3>
+                    </div>
+                    <form th:action="${battery.id == null} ? @{/admin/batteries} : @{/admin/batteries/update/{id}(id=${battery.id})}" th:object="${battery}" method="post">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="station">Trạm hiện tại</label>
+                                <select class="form-control" id="station" th:field="*{station}">
+                                    <option value="">-- Không thuộc trạm nào --</option>
+                                    <option th:each="st : ${stations}" th:value="${st.id}" th:text="${st.name}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="serialNumber">Serial</label>
+                                <input type="text" class="form-control" id="serialNumber" th:field="*{serialNumber}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="model">Model</label>
+                                <input type="text" class="form-control" id="model" th:field="*{model}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="capacityKwh">Dung lượng (kWh)</label>
+                                <input type="number" step="0.01" class="form-control" id="capacityKwh" th:field="*{capacityKwh}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="currentChargePercentage">Phần trăm pin hiện tại (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="currentChargePercentage" th:field="*{currentChargePercentage}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="healthPercentage">SOH (%)</label>
+                                <input type="number" step="0.01" class="form-control" id="healthPercentage" th:field="*{healthPercentage}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Trạng thái</label>
+                                <select class="form-control" id="status" th:field="*{status}">
+                                    <option value="AVAILABLE">Sẵn sàng</option>
+                                    <option value="CHARGING">Đang sạc</option>
+                                    <option value="MAINTENANCE">Bảo dưỡng</option>
+                                    <option value="EMPTY">Pin trống</option>
+                                    <option value="RENTED">Đang thuê</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                            <a th:href="@{/admin/batteries}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

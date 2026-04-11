@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Chỉnh Sửa Giao Dịch')}"></head>
+
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+
+    <aside th:replace="~{admin/fragments/_header :: sidebar('transactions')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <h1>Chỉnh Sửa Giao Dịch #<span th:text="${transaction.id}"></span></h1>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <form th:action="@{/admin/transactions/update/{id}(id=${transaction.id})}" th:object="${transaction}" method="post">
+                    <input type="hidden" th:field="*{id}" />
+                    <div class="card card-primary">
+                        <div class="card-header"><h3 class="card-title">Thông tin giao dịch</h3></div>
+                        <div class="card-body">
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Trạm Giao Dịch</label>
+                                        <input type="text" class="form-control" th:value="${transaction.station?.name}" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Khách hàng</label>
+                                        <input type="text" class="form-control" th:value="${transaction.user?.fullName}" disabled />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Pin Cũ (Pin trả vào)</label>
+                                        <input type="text" class="form-control" th:value="${transaction.batteryIn?.serialNumber}" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Pin Mới (Pin lấy ra)</label>
+                                        <input type="text" class="form-control" th:value="${transaction.batteryOut?.serialNumber}" disabled />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Số tiền</label>
+                                        <input type="number" step="1000" class="form-control" th:field="*{amount}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="paymentStatus">Trạng thái TT</label>
+                                        <select class="form-control" id="paymentStatus" th:field="*{paymentStatus}">
+                                            <option value="PENDING">Chờ xử lý</option>
+                                            <option value="COMPLETED">Hoàn thành</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Phương thức TT</label>
+                                        <select class="form-control" th:field="*{paymentMethod}" required>
+                                            <option value="CASH">Tiền mặt</option>
+                                            <option value="WALLET">Ví điện tử</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Ghi chú</label>
+                                        <textarea class="form-control" rows="1" th:field="*{notes}"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Lưu Thay Đổi</button>
+                            <a th:href="@{/admin/transactions}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>
