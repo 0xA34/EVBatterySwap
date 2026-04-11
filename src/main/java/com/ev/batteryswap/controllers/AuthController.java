@@ -57,7 +57,10 @@ public class AuthController {
                 user == null ||
                         !passwordEncoder.matches(password, user.getPassword())
         ) {
-            return ResponseEntity.badRequest().body("Tài Khoản Hoặc Mật Khẩu Không Đúng!");
+            resp.put("message", "Tài Khoản Hoặc Mật Khẩu Không Đúng!");
+            resp.put("token", "None");
+            resp.put("status", 400);
+            return ResponseEntity.badRequest().body(resp);
         }
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(
