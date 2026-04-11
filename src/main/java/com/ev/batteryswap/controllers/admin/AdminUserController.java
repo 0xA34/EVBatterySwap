@@ -1,7 +1,6 @@
 package com.ev.batteryswap.controllers.admin;
 
 import com.ev.batteryswap.pojo.User;
-import com.ev.batteryswap.repositories.UserRepository;
 import com.ev.batteryswap.services.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
