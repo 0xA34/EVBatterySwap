@@ -42,6 +42,11 @@ public class UserService implements IUserService {
         return Optional.of(toDTO(user));
     }
 
+    @Override
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     private UserProfileDTO toDTO(User user) {
         return UserProfileDTO.builder()
             .id(user.getId())

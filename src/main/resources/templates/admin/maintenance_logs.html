@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragments/_header :: common_header('Nhật Ký Bảo Trì')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{admin/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{admin/fragments/_header :: sidebar('maintenance')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid"><h1>Nhật Ký Bảo Trì & Sự Cố</h1></div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Pin (Serial)</th>
+                                <th>Loại</th>
+                                <th>Mô tả / Lý do</th>
+                                <th>Chi phí</th>
+                                <th>Người báo cáo/KTV</th>
+                                <th>Ngày ghi nhận</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="log : ${logPage.content}">
+                                <td th:text="${log.id}">1</td>
+                                <td>
+                                    <a th:href="@{/admin/batteries(search=${log.battery.serialNumber})}">
+                                        <code th:text="${log.battery.serialNumber}">VF-123</code>
+                                    </a>
+                                </td>
+                                <td>
+                                        <span class="badge"
+                                              th:classappend="${log.maintenanceType == 'REPORT_ISSUE' ? 'badge-warning' : 'badge-success'}"
+                                              th:text="${log.maintenanceType == 'REPORT_ISSUE' ? 'Báo hỏng' : 'Đã sửa xong'}">
+                                        </span>
+                                </td>
+                                <td th:text="${log.description}">Vỏ nứt</td>
+                                <td th:text="${#numbers.formatDecimal(log.cost, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                <td th:text="${log.technician}">Staff A</td>
+                                <td th:text="${#temporals.format(log.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
+</div>
+<div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+</body>
+</html>

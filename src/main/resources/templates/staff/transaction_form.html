@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{staff/fragments/_header :: common_header('Tạo Giao Dịch Mới')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+    <nav th:replace="~{staff/fragments/_header :: navbar}"></nav>
+    <aside th:replace="~{staff/fragments/_header :: sidebar('transactions')}"></aside>
+    <div class="content-wrapper">
+        <section class="content-header"><h1>Tạo Giao Dịch Đổi Pin</h1></section>
+        <section class="content">
+            <div class="container-fluid">
+                <form th:action="@{/staff/transactions}" th:object="${transaction}" method="post">
+                    <div class="card card-primary">
+                        <div class="card-body">
+                            <div class="alert alert-info">Giao dịch tại trạm: <b th:text="${transaction.station?.name}"></b></div>
+                            <input type="hidden" th:field="*{station}" />
+
+                            <div class="form-group">
+                                <label for="user">Khách hàng</label>
+                                <select class="form-control" id="user" th:field="*{user}" required>
+                                    <option value="">-- Chọn khách hàng --</option>
+                                    <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.username} + ' (' + ${u.fullName} + ')'"></option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6"><div class="form-group"><label>Pin Cũ (Pin khách trả vào):</label>
+                                    <select class="form-control" id="batteryIn" th:field="*{batteryIn}" required>
+                                        <option value="">-- Chọn pin cũ --</option>
+                                        <option th:each="bat : ${rentedBatteries}"
+                                                th:value="${bat.id}"
+                                                th:text="${bat.serialNumber} + ' (Đang thuê)'"
+                                                th:data-user-id="${bat.currentUser?.id}">
+                                        </option>
+                                    </select>
+                                </div></div>
+                                <div class="col-md-6"><div class="form-group"><label>Pin Mới (Pin đưa cho khách):</label>
+                                    <select class="form-control" th:field="*{batteryOut}" required>
+                                        <option value="">-- Chọn pin mới (Sẵn sàng tại trạm) --</option>
+                                        <option th:each="bat : ${availableBatteries}"
+                                                th:value="${bat.id}"
+                                                th:text="${bat.serialNumber}"></option>
+                                    </select>
+                                </div></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4"><div class="form-group"><label>Số tiền:</label><input type="number" class="form-control" th:field="*{amount}" required></div></div>
+                                <div class="col-md-4"><div class="form-group"><label>Phương thức TT:</label>
+                                    <select class="form-control" th:field="*{paymentMethod}" required>
+                                        <option value="CASH">Tiền mặt</option>
+                                        <option value="CARD">Thẻ</option>
+                                        <option value="WALLET">Ví điện tử</option>
+                                    </select>
+                                </div></div>
+                                <div class="col-md-4"><div class="form-group"><label>Trạng thái TT:</label>
+                                    <select class="form-control" th:field="*{paymentStatus}">
+                                        <option value="COMPLETED">Hoàn thành</option>
+                                        <option value="PENDING">Chờ xử lý</option>
+                                    </select>
+                                </div></div>
+                            </div>
+                            <div class="form-group"><label>Ghi chú:</label><textarea class="form-control" rows="2" th:field="*{notes}"></textarea></div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Xác nhận & Lưu Giao dịch</button>
+                            <a th:href="@{/staff/transactions}" class="btn btn-secondary">Hủy</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </div>
+    <div th:insert="~{admin/fragments/_footer :: footer}"></div>
+</div>
+<div th:insert="~{admin/fragments/_footer :: common_scripts}"></div>
+
+<script th:inline="javascript">
+    $(document).ready(function() {
+        var $userSelect = $('#user');
+        var $batteryInSelect = $('#batteryIn');
+
+        // 1. Lưu bản mẫu
+        var $allBatteryInOptions = $batteryInSelect.find('option[data-user-id]').clone();
+
+        // 2. Xóa các tùy chọn pin (để lại placeholder)
+        $batteryInSelect.find('option[data-user-id]').remove();
+
+        // 3. Hàm lọc
+        function updateBatteryInForUser(selectedUserId) {
+            var currentBatteryInValue = $batteryInSelect.val();
+
+            $batteryInSelect.find('option[data-user-id]').remove();
+            $batteryInSelect.find('option[disabled]').remove();
+
+            var $placeholder = $batteryInSelect.find('option[value=""]');
+
+            if (!selectedUserId) {
+                $placeholder.text('-- Vui lòng chọn khách hàng trước --');
+                $batteryInSelect.prop('disabled', true);
+                return;
+            }
+
+            $batteryInSelect.prop('disabled', false);
+            $placeholder.text('-- Chọn pin khách trả --');
+
+            var found = false;
+            $allBatteryInOptions.each(function() {
+                if ($(this).data('user-id') == selectedUserId) {
+                    $batteryInSelect.append($(this).clone());
+                    found = true;
+                }
+            });
+
+            if (!found) {
+                $batteryInSelect.append('<option value="" disabled>Khách hàng này không có pin nào đang thuê</option>');
+            }
+
+            $batteryInSelect.val(currentBatteryInValue);
+        }
+
+        // 4. Lắng nghe sự kiện
+        $userSelect.on('change', function() {
+            $batteryInSelect.val("");
+            updateBatteryInForUser($(this).val());
+        });
+
+        // 5. Chạy lần đầu
+        var initialUserId = $userSelect.val();
+        updateBatteryInForUser(initialUserId);
+    });
+</script>
+
+</body>
+</html>

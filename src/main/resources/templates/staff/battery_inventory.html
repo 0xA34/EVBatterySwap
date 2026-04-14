@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{staff/fragments/_header :: common_header('Quản lý Pin')}"></head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+    <nav th:replace="~{staff/fragments/_header :: navbar}"></nav>
+
+    <aside th:replace="~{staff/fragments/_header :: sidebar('batteries')}"></aside>
+
+    <div class="content-wrapper">
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h1>Quản lý Pin tại trạm <span class="text-primary" th:text="${station?.name}"></span></h1>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a th:href="@{/staff/dashboard}">Home</a></li>
+                            <li class="breadcrumb-item active">Kho Pin</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content">
+            <div class="container-fluid">
+
+                <div th:replace="~{admin/fragments/_alerts :: alerts}"></div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-filter mr-1"></i> Bộ lọc</h3>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/staff/batteries}" method="get" class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Trạng thái:</label>
+                                    <select name="status" class="form-control">
+                                        <option value="">Tất cả</option>
+                                        <option value="AVAILABLE" th:selected="${'AVAILABLE' == selectedStatus}">Sẵn sàng</option>
+                                        <option value="CHARGING" th:selected="${'CHARGING' == selectedStatus}">Đang sạc</option>
+                                        <option value="MAINTENANCE" th:selected="${'MAINTENANCE' == selectedStatus}">Bảo dưỡng</option>
+                                        <option value="EMPTY" th:selected="${'EMPTY' == selectedStatus}">Pin trống</option>
+                                        <option value="RENTED" th:selected="${'RENTED' == selectedStatus}">Đang thuê (Khách)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label>Tìm kiếm:</label>
+                                    <input type="text" name="search" class="form-control"
+                                           placeholder="Nhập mã Serial pin..." th:value="${search}" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 align-self-end">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search mr-1"></i> Lọc
+                                    </button>
+                                    <a th:href="@{/staff/batteries}" class="btn btn-secondary">
+                                        <i class="fas fa-sync-alt mr-1"></i> Làm mới
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Danh sách Pin (<span th:text="${batteryPage.totalElements}">0</span>)</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Mã Serial</th>
+                                    <th>Dòng xe (Model)</th>
+                                    <th>Dung lượng</th>
+                                    <th>Pin (%)</th>
+                                    <th>Sức khỏe (SoH)</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="b : ${batteryPage.content}">
+                                    <td th:text="${b.id}">1</td>
+                                    <td><code th:text="${b.serialNumber}" class="text-bold">VF-123</code></td>
+                                    <td th:text="${b.model}">Klara S</td>
+                                    <td th:text="${#numbers.formatDecimal(b.capacityKwh, 0, 'COMMA', 1, 'POINT')} + ' kWh'"></td>
+
+                                    <td>
+                                            <span class="badge"
+                                                  th:classappend="${b.currentChargePercentage gt 80 ? 'badge-success' : (b.currentChargePercentage gt 30 ? 'badge-warning' : 'badge-danger')}"
+                                                  th:text="${b.currentChargePercentage} + '%'">
+                                            </span>
+                                    </td>
+
+                                    <td th:text="${b.healthPercentage} + '%'">100%</td>
+
+                                    <td>
+                                            <span class="badge"
+                                                  th:classappend="${b.status == 'AVAILABLE' ? 'badge-success' :
+                                                                   (b.status == 'CHARGING' ? 'badge-primary' :
+                                                                   (b.status == 'MAINTENANCE' ? 'badge-warning' :
+                                                                   (b.status == 'RENTED' ? 'badge-info' : 'badge-danger')))}">
+                                                <span th:if="${b.status == 'AVAILABLE'}">Sẵn sàng</span>
+                                                <span th:if="${b.status == 'CHARGING'}">Đang sạc</span>
+                                                <span th:if="${b.status == 'MAINTENANCE'}">Bảo dưỡng</span>
+                                                <span th:if="${b.status == 'RENTED'}">Đang thuê</span>
+                                                <span th:if="${b.status == 'EMPTY'}">Pin rỗng</span>
+                                            </span>
+                                    </td>
+
+                                    <td>
+                                        <button th:if="${b.status != 'MAINTENANCE' and b.status != 'RENTED'}"
+                                                class="btn btn-warning btn-sm"
+                                                title="Báo hỏng / Yêu cầu bảo trì"
+                                                th:data-id="${b.id}"
+                                                th:data-serial="${b.serialNumber}"
+                                                onclick="openReportModal(this.getAttribute('data-id'), this.getAttribute('data-serial'))">
+                                            <i class="fas fa-wrench"></i> Báo hỏng
+                                        </button>
+
+                                        <span th:if="${b.status == 'MAINTENANCE'}" class="text-muted small">
+                                                <i class="fas fa-tools"></i> Đang xử lý
+                                            </span>
+                                        <span th:if="${b.status == 'RENTED'}" class="text-muted small">
+                                                <i class="fas fa-user"></i> Khách giữ
+                                            </span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${batteryPage.empty}">
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-box-open fa-3x mb-3"></i><br />
+                                        Không tìm thấy viên pin nào.
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer clearfix" th:if="${batteryPage.totalPages > 1}">
+                        <ul class="pagination pagination-sm m-0 float-right">
+                            <li class="page-item" th:classappend="${batteryPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/staff/batteries(page=${batteryPage.number - 1}, status=${selectedStatus}, search=${search})}">«</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, batteryPage.totalPages - 1)}"
+                                th:classappend="${i == batteryPage.number} ? 'active'">
+                                <a class="page-link" th:href="@{/staff/batteries(page=${i}, status=${selectedStatus}, search=${search})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${batteryPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/staff/batteries(page=${batteryPage.number + 1}, status=${selectedStatus}, search=${search})}">»</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div th:insert="~{admin/fragments/_footer :: footer}"></div>
+
+</div>
+
+<div th:insert="~{admin/fragments/_footer :: common_scripts}"></div>
+
+<div class="modal fade" id="reportModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form th:action="@{/staff/batteries/report}" method="post">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title text-dark"><i class="fas fa-exclamation-triangle mr-2"></i>Báo hỏng Pin</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="batteryId" id="modalBatteryId" />
+
+                    <div class="alert alert-light border">
+                        Bạn đang thực hiện báo hỏng cho Pin: <strong id="modalBatterySerial" class="text-danger"></strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold">Mô tả sự cố / Lý do hỏng:</label>
+                        <textarea name="reason" class="form-control" rows="4" required
+                                  placeholder="Vui lòng mô tả chi tiết lỗi (ví dụ: Vỏ nứt, không nhận sạc, đèn báo lỗi...)"></textarea>
+                    </div>
+
+                    <div class="text-muted small">
+                        <i class="fas fa-info-circle"></i> Lưu ý: Sau khi xác nhận, trạng thái pin sẽ chuyển sang <b>MAINTENANCE</b> và không thể dùng để đổi cho khách.
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-warning font-weight-bold">Xác nhận Báo hỏng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openReportModal(id, serial) {
+        // Gán ID vào input ẩn
+        document.getElementById('modalBatteryId').value = id;
+        // Hiển thị Serial lên giao diện
+        document.getElementById('modalBatterySerial').innerText = serial;
+        // Mở Modal
+        $('#reportModal').modal('show');
+    }
+</script>
+
+</body>
+</html>

@@ -12,6 +12,8 @@ public interface IUserService {
     Optional<UserProfileDTO> findById(int id);
     Optional<UserProfileDTO> findByUsername(String username);
 
+    User findUserByUsername(String username);
+
     Page<User> filterUsers(String searchKeyword, Pageable pageable);
 
     void updateUserRole(Integer userId, String role);
