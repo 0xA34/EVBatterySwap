@@ -29,14 +29,46 @@ public class IndexController {
         return "login";
     }
 
+
+    @GetMapping("/user/packages")
+    public String userPackagesPage(HttpServletRequest request) {
+
+        String token = jwtCookieHelper.extractCookieToken(
+                request,
+                AuthController.COOKIE_NAME
+        );
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            return "user/packages";
+        }
+        return "packages";
+    }
+
+
     @GetMapping("/user/register")
-    public String showRegisterPage() {
+    public String showRegisterPage(HttpServletRequest request) {
+
+        String token = jwtCookieHelper.extractCookieToken(
+                request,
+                AuthController.COOKIE_NAME
+        );
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            return "user/my";
+        }
         return "register";
     }
 
     @GetMapping("/")
-    public String showHomePage() {
+    public String showHomePage(HttpServletRequest request) {
+        String token = jwtCookieHelper.extractCookieToken(
+                request,
+                AuthController.COOKIE_NAME
+        );
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            return "user/my";
+        }
         return "index";
     }
+
+
 
 }

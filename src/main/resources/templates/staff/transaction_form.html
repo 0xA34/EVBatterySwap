@@ -29,7 +29,7 @@
                                         <option th:each="bat : ${rentedBatteries}"
                                                 th:value="${bat.id}"
                                                 th:text="${bat.serialNumber} + ' (Đang thuê)'"
-                                                th:data-user-id="${bat.currentUser?.id}">
+                                                th:data-user-id="${bat.user?.id}">
                                         </option>
                                     </select>
                                 </div></div>
