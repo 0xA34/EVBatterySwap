@@ -12,6 +12,7 @@ import java.util.Map;
 public interface IBatteryService {
     Page<Battery> filterBatteries(Integer stationId, String status, String nameKeyword, Pageable pageable);
     List<Station> getAllStations();
+    List<Battery> getAvailableBatteriesByStation(Integer stationId);
     void saveBattery(Battery battery);
     void deleteBattery(Integer id);
     Map<String, Long> getBatteryStatistics();

@@ -11,11 +11,17 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @Service
 public class StationService implements IStationService {
     @Autowired
     private StationRepository stationRepository;
+
+    @Override
+    public List<Station> getActiveStations() {
+        return stationRepository.findByStatus("ACTIVE");
+    }
 
     @Override
     public Page<Station> filterStations(String search, Pageable pageable) {

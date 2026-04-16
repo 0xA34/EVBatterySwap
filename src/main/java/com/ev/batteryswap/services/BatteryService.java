@@ -33,6 +33,11 @@ public class BatteryService implements IBatteryService {
     }
 
     @Override
+    public List<Battery> getAvailableBatteriesByStation(Integer stationId) {
+        return batteryRepository.findByStationIdAndStatus(stationId, "AVAILABLE");
+    }
+
+    @Override
     public Page<Battery> filterBatteries(
         Integer stationId,
         String status,

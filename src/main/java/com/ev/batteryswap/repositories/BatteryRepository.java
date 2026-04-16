@@ -3,6 +3,7 @@ package com.ev.batteryswap.repositories;
 import com.ev.batteryswap.pojo.Battery;
 import com.ev.batteryswap.pojo.Station;
 import com.ev.batteryswap.pojo.User;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,6 +20,8 @@ public interface BatteryRepository
     // lấy dữ liệu pin cho cho station
     long countByStation(Station station);
     long countByStationAndStatus(Station station, String status);
+
+    List<Battery> findByStationIdAndStatus(Integer stationId, String status);
 
     // tìm kiếm pin đang cho thuê
     @Query(

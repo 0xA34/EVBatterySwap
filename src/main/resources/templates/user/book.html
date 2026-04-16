@@ -97,60 +97,34 @@
 
 
 <script>
-    const data = {
-        "Hà Nội": [
-            {
-                "id": "HN-01",
-                "name": "Trạm Times City",
-                "pins": [
-                    {"id": "P48", "name": "Pin 48V"},
-                    {"id": "P60", "name": "Pin 60V"}
-                ]
-            },
-            {
-                "id": "HN-02",
-                "name": "Trạm Cầu Giấy",
-                "pins": [
-                    {"id": "P48", "name": "Pin 48V"},
-                    {"id": "P72", "name": "Pin 72V"}
-                ]
-            }
-        ],
-        "TP. Hồ Chí Minh": [
-            {
-                "id": "HCM-01",
-                "name": "Trạm Quận 1",
-                "pins": [
-                    {"id": "P60", "name": "Pin 60V"},
-                    {"id": "P72", "name": "Pin 72V"}
-                ]
-            },
-            {
-                "id": "HCM-02",
-                "name": "Trạm Thủ Đức",
-                "pins": [
-                    {"id": "P48", "name": "Pin 48V"},
-                    {"id": "P60", "name": "Pin 60V"}
-                ]
-            }
-        ],
-        "Đà Nẵng": [
-            {
-                "id": "DN-01",
-                "name": "Trạm Hải Châu",
-                "pins": [
-                    {"id": "P48", "name": "Pin 48V"},
-                    {"id": "P60", "name": "Pin 60V"}
-                ]
-            }
-        ]
-    };
+    let dbStations = [];
 
     const provinceSelect = document.getElementById('provinceSelect');
     const stationSelect = document.getElementById('stationSelect');
     const pinSelect = document.getElementById('pinSelect');
     const stationNameInput = document.getElementById('stationNameInput');
     const pinNameInput = document.getElementById('pinNameInput');
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const res = await fetch('/api/user/reservations/stations');
+            if (res.ok) {
+                dbStations = await res.json();
+                
+                const provinces = [...new Set(dbStations.map(s => s.province))];
+                
+                provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh --</option>';
+                provinces.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p;
+                    provinceSelect.appendChild(opt);
+                });
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    });
 
     provinceSelect.addEventListener('change', function() {
         const province = this.value;
@@ -161,48 +135,88 @@
         stationNameInput.value = '';
         pinNameInput.value = '';
 
-        if (!province || !data[province]) return;
+        if (!province) return;
 
-        data[province].forEach(station => {
+        const filteredStations = dbStations.filter(s => s.province === province);
+        filteredStations.forEach(station => {
             const opt = document.createElement('option');
             opt.value = station.id;
-            opt.textContent = station.name;
+            opt.textContent = station.name + " (" + station.address + ")";
             opt.dataset.name = station.name;
             stationSelect.appendChild(opt);
         });
         stationSelect.disabled = false;
     });
 
-    stationSelect.addEventListener('change', function() {
-        const province = provinceSelect.value;
+    stationSelect.addEventListener('change', async function() {
         const stationId = this.value;
         pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
         pinSelect.disabled = true;
         pinNameInput.value = '';
         stationNameInput.value = this.options[this.selectedIndex]?.dataset?.name || '';
 
-        const station = (data[province] || []).find(s => s.id === stationId);
-        if (!station) return;
+        if (!stationId) return;
 
-        station.pins.forEach(pin => {
-            const opt = document.createElement('option');
-            opt.value = pin.id;
-            opt.textContent = pin.name;
-            opt.dataset.name = pin.name;
-            pinSelect.appendChild(opt);
-        });
-        pinSelect.disabled = false;
+        try {
+            const res = await fetch(`/api/user/reservations/stations/${stationId}/batteries`);
+            if (res.ok) {
+                const batteries = await res.json();
+                batteries.forEach(pin => {
+                    const opt = document.createElement('option');
+                    opt.value = pin.id;
+                    opt.textContent = pin.serialNumber + " - " + pin.capacity;
+                    opt.dataset.name = pin.serialNumber;
+                    pinSelect.appendChild(opt);
+                });
+                pinSelect.disabled = batteries.length === 0;
+            }
+        } catch (e) {
+            console.error(e);
+        }
     });
 
     pinSelect.addEventListener('change', function() {
         pinNameInput.value = this.options[this.selectedIndex]?.dataset?.name || '';
     });
 
-    // Basic front-end validation
-    document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+    document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
         if (!provinceSelect.value || !stationSelect.value || !pinSelect.value || !document.getElementById('startTime').value) {
-            e.preventDefault();
             alert('Vui lòng chọn đầy đủ thông tin.');
+            return;
+        }
+
+        const submitBtn = this.querySelector('.submit-button');
+        const oldText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Đang xử lý...';
+
+        try {
+            const payload = {
+                stationId: stationSelect.value,
+                batteryId: pinSelect.value,
+                pickupTime: document.getElementById('startTime').value
+            };
+
+            const response = await fetch('/api/user/reservations/book', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+            if (response.ok && result.success) {
+                alert('Đặt lịch thành công!');
+                window.location.href = '/user/my';
+            } else {
+                alert(result.message || 'Có lỗi xảy ra.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Lỗi kết nối máy chủ!');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = oldText;
         }
     });
 </script>
