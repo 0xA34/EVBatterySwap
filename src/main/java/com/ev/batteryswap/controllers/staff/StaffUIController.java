@@ -21,9 +21,10 @@ public class StaffUIController {
     @GetMapping("/login")
     public String loginPage(HttpServletRequest request) {
         String token = jwtCookieHelper.extractCookieToken(
-            request,
+                request,
                 AuthController.COOKIE_NAME
         );
+//        String token = jwtCookieHelper.extractCookieToken(request, "staff_token");
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "STAFF")) {
             return "redirect:/staff/dashboard";
         }
@@ -31,16 +32,8 @@ public class StaffUIController {
     }
 
     @GetMapping({ "", "/", "/dashboard" })
-    public String dashboard(HttpServletRequest request) {
-        String token = jwtCookieHelper.extractCookieToken(
-            request,
-                AuthController.COOKIE_NAME
-        );
-        if (
-            token == null || !jwtCookieHelper.isValidRoleToken(token, "STAFF")
-        ) {
-            return "redirect:/staff/login";
-        }
+    public String dashboard() {
+        // Interceptor đã kiểm tra role rồi, không cần kiểm tra lại
         return "staff/dashboard";
     }
 
@@ -50,8 +43,8 @@ public class StaffUIController {
         HttpServletResponse response
     ) {
         jwtCookieHelper.revokeAndExpireCookie(
-            request,
-            response,
+                request,
+                response,
                 AuthController.COOKIE_NAME,
                 AuthController.COOKIE_PATH
         );
