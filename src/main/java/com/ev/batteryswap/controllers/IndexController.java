@@ -24,7 +24,7 @@ public class IndexController {
                 AuthController.COOKIE_NAME
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
-            return "user/my";
+            return "redirect:/my";
         }
         return "login";
     }
@@ -52,7 +52,7 @@ public class IndexController {
                 AuthController.COOKIE_NAME
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
-            return "user/my";
+            return "redirect:/my";
         }
         return "register";
     }
@@ -64,7 +64,7 @@ public class IndexController {
                 AuthController.COOKIE_NAME
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
-            return "user/my";
+            return "redirect:/my";
         }
         return "index";
     }

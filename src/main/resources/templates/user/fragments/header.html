@@ -9,7 +9,7 @@
             <ul id="menu" class="menu">
                 <li><a href="my">Trang chủ</a></li>
                 <li><a href="dashboard">Đổi pin</a></li>
-                <li><a href="datlich">Đặt lịch</a></li>
+                <li><a href="book">Đặt lịch</a></li>
                 <li><a href="contact">Hỗ trợ</a></li>
                 <li><a href="pricing">Đăng ký gói</a></li>
             </ul>
@@ -73,7 +73,7 @@
                         <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <path d="M2 12h20" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.5"/>
                     </svg>
-                    <span class="money-amount">0</span>
+                    <span th:text="${walletBalance}" class="money-amount">0</span>
                 </div>
 
                 <div class="has-sub">
@@ -94,7 +94,7 @@
 
                     <ul class="submenu" aria-label="Tài khoản">
                         <li class="user-name-item">
-                            <span class="username">username</span>
+                            <span th:text="${username}" class="username">username</span>
                         </li>
                         <li><a href="naptien">Nạp tiền</a></li>
                         <li><a href="profile">Profile</a></li>
