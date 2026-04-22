@@ -215,10 +215,71 @@
 <main class="profile">
     <div class="profile-container">
         <div class="profile-header">
-            <h1>Hồ Sơ Cá Nhân</h1>
+            <h1>👤 Hồ sơ cá nhân</h1>
             <p>Thông tin tài khoản và liên hệ của bạn</p>
         </div>
 
+        <div class="profile-grid">
+            <div class="profile-card">
+                <h2 class="card-title">Thông tin cá nhân</h2>
+                <div class="info-grid">
+                    <div th:each="InfoUser : ${InfoUser}" class="info-item">
+                        <div class="info-label">Tên đăng nhập</div>
+                        <div th:text="${InfoUser.get().getUsername()}" name="username" class="info-value">username</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Vai trò</div>
+                        <div th:text="${InfoUser.get().getRole()}" name="role" class="info-value">role</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">ID người dùng</div>
+                        <div th:text="${InfoUser.get().getId()}" class="info-value">0</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Ngày tham gia</div>
+                        <div th:text="${#temporals.format(InfoUser.get().createdAt, 'dd/MM/yyyy HH:mm:ss')}"
+                             class="info-value"></div>
+                    </div>
+<!--                    <div class="info-item">-->
+<!--                        <div class="info-label">PIN Đang Sử Dụng</div>-->
+<!--                        <div th:text="${model_battery}" class="info-value">Không có</div>-->
+<!--                    </div>-->
+<!--                    <div class="info-item">-->
+<!--                        <div class="info-label">Gói Dịch Vụ</div>-->
+<!--                        <div th:text="${pack_name}" class="info-value">Không có</div>-->
+<!--                    </div>-->
+<!--                    <div class="info-item">-->
+<!--                        <div class="info-label">Vin Code</div>-->
+<!--                        <div th:text="${vin_code}" class="info-value">Không có mã</div>-->
+<!--                    </div>-->
+                </div>
+            </div>
+            <div class="profile-card">
+                <h2 class="card-title">Thông tin liên hệ</h2>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <div class="contact-label">Email</div>
+                        <div th:text="${InfoUser.get().getEmail()}" class="contact-value">example@gmail.com</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Số điện thoại</div>
+                        <div class="contact-value">0123456789</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Địa chỉ</div>
+                        <div class="contact-value">123 Đường Lê Lợi, Quận 1, TP.HCM</div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <a href="#" class="profile-button button-secondary">
+                        🔗 Cập nhật thông tin liên hệ hệ thống
+                    </a>
+                    <a href="#" class="profile-button button-primary">
+                        🔑 Đổi mật khẩu
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </main>
 

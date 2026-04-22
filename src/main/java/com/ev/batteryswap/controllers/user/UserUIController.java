@@ -9,11 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import com.ev.batteryswap.security.JwtTokenProvider;
 import com.ev.batteryswap.services.UserService;
-
 import java.util.Optional;
 
 @Controller
-
 public class UserUIController {
 
     private final JwtCookieHelper jwtCookieHelper;
@@ -35,8 +33,8 @@ public class UserUIController {
         Optional<UserProfileDTO> user = userService.findByUsername(username);
         model.addAttribute("username", user.get().getUsername());
         model.addAttribute("walletBalance", user.get().getWalletBalance());
+        model.addAttribute("InfoUser", user);
     }
-
 
 
     @GetMapping("/user/my")
@@ -79,6 +77,10 @@ public class UserUIController {
         }
         return "login";
     }
+
+
+
+
 
 
 }
