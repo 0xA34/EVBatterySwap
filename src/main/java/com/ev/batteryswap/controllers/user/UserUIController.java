@@ -79,8 +79,17 @@ public class UserUIController {
     }
 
 
-
-
-
+    @GetMapping("/user/topup")
+    public String topupPage(HttpServletRequest request, Model model) {
+        String token = jwtCookieHelper.extractCookieToken(
+                request,
+                AuthController.COOKIE_NAME
+        );
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            show_info(model, token);
+            return "user/topup";
+        }
+        return "login";
+    }
 
 }
