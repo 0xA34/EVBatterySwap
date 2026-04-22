@@ -2,7 +2,13 @@ package com.ev.batteryswap.controllers.user;
 
 import com.ev.batteryswap.controllers.AuthController;
 import com.ev.batteryswap.pojo.Battery;
+import com.ev.batteryswap.pojo.Phuongxa;
+import com.ev.batteryswap.pojo.Quanhuyen;
 import com.ev.batteryswap.pojo.Station;
+import com.ev.batteryswap.pojo.Tinhthanh;
+import com.ev.batteryswap.repositories.PhuongxaRepository;
+import com.ev.batteryswap.repositories.QuanhuyenRepository;
+import com.ev.batteryswap.repositories.TinhthanhRepository;
 import com.ev.batteryswap.security.JwtCookieHelper;
 import com.ev.batteryswap.security.JwtTokenProvider;
 import com.ev.batteryswap.services.BatteryService;
@@ -18,8 +24,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user/reservations")
@@ -43,9 +51,82 @@ public class UserReservationController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/stations")
-    public ResponseEntity<List<Station>> getActiveStations() {
-        return ResponseEntity.ok(stationService.getActiveStations());
+    @Autowired
+    private TinhthanhRepository tinhthanhRepository;
+
+    @Autowired
+    private QuanhuyenRepository quanhuyenRepository;
+
+    @Autowired
+    private PhuongxaRepository phuongxaRepository;
+
+
+    @GetMapping("/location/tinhthanh")
+    public ResponseEntity<List<Map<String, Object>>> getAllTinhthanh() {
+        List<Map<String, Object>> result = tinhthanhRepository.findAll().stream()
+                .map(t -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", t.getId());
+                    m.put("ten", t.getTinhthanhcol());
+                    return m;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/location/quanhuyen/{tinhId}")
+    public ResponseEntity<List<Map<String, Object>>> getQuanhuyenByTinh(@PathVariable("tinhId") Integer tinhId) {
+        Tinhthanh tinh = tinhthanhRepository.findById(tinhId).orElse(null);
+        if (tinh == null) return ResponseEntity.ok(List.of());
+        List<Map<String, Object>> result = quanhuyenRepository.findByIdtinhthanh(tinh).stream()
+                .map(q -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", q.getId());
+                    m.put("ten", q.getTenquanhuyen());
+                    return m;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/location/phuongxa/{huyenId}")
+    public ResponseEntity<List<Map<String, Object>>> getPhuongxaByHuyen(@PathVariable("huyenId") Integer huyenId) {
+        Quanhuyen huyen = quanhuyenRepository.findById(huyenId).orElse(null);
+        if (huyen == null) return ResponseEntity.ok(List.of());
+        List<Map<String, Object>> result = phuongxaRepository.findByIdquanhuyen(huyen).stream()
+                .map(p -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", p.getId());
+                    m.put("ten", p.getTenphuongxa());
+                    return m;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/stations/by-xa/{xaId}")
+    public ResponseEntity<List<Map<String, Object>>> getStationsByXa(@PathVariable("xaId") Integer xaId) {
+        Phuongxa xa = phuongxaRepository.findById(xaId).orElse(null);
+        if (xa == null) return ResponseEntity.ok(List.of());
+        
+        List<Station> stations = stationService.getActiveStations().stream()
+                .filter(s -> s.getPhuongxa() != null && s.getPhuongxa().getId().equals(xaId))
+                .collect(Collectors.toList());
+                
+        List<Map<String, Object>> result = stations.stream()
+                .map(s -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", s.getId());
+                    m.put("name", s.getName());
+                    m.put("address", s.getAddress());
+                    m.put("quanId", s.getQuan() != null ? s.getQuan().getId() : null);
+                    m.put("quanName", s.getQuan() != null ? s.getQuan().getTenquanhuyen() : null);
+                    m.put("xaId", s.getPhuongxa() != null ? s.getPhuongxa().getId() : null);
+                    m.put("xaName", s.getPhuongxa() != null ? s.getPhuongxa().getTenphuongxa() : null);
+                    return m;
+                })
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/stations/{id}/batteries")

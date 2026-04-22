@@ -24,11 +24,17 @@ public class Station {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @Column(name = "quan", nullable = false, length = 45)
-    private String quan;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "quan", nullable = false)
+    private Quanhuyen quan;
 
-    @Column(name = "province", nullable = false, length = 45)
-    private String province;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "province", nullable = false)
+    private Tinhthanh province;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "phuongxa")
+    private Phuongxa phuongxa;
 
     @Lob
     @Column(name = "status", nullable = false)
