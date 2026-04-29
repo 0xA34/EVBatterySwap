@@ -665,5 +665,152 @@
 <!-- Footer -->
 <div th:replace="~{user/fragments/footer :: site-footer}"></div>
 
+<script>
+    const paymentInfos = [
+        {
+            id: 1,
+            bank_name: "ACB - Ngân hàng Á Châu",
+            account_number: "22749061",
+            account_holder: "HUYNH MAI NHAT MINH",
+            qr_code_url: ""
+        },
+    ];
+
+    // DOM Elements
+    const amountButtons = document.querySelectorAll(".amount-btn");
+    const amountInput = document.getElementById("amountInput");
+    const rechargeForm = document.getElementById("rechargeForm");
+    const bankCards = document.getElementById("bankCards");
+
+    // Render Bank Cards
+    function renderBankCards() {
+        bankCards.innerHTML = "";
+        paymentInfos.forEach((bank) => {
+            const card = document.createElement("div");
+            card.className = "bank-info";
+            card.innerHTML = `
+                    <div class="bank-name">${bank.bank_name}</div>
+                    <div class="bank-detail">
+                        <span class="bank-detail-label">Số tài khoản:</span>
+                        <span class="bank-detail-value" id="account-${bank.id}">${bank.account_number}</span>
+                        <button type="button" class="copy-btn" onclick="copyText('account-${bank.id}', this)">Copy</button>
+                    </div>
+                    <div class="bank-detail">
+                        <span class="bank-detail-label">Chủ tài khoản:</span>
+                        <span class="bank-detail-value">${bank.account_holder}</span>
+                    </div>
+                `;
+            bankCards.appendChild(card);
+        });
+    }
+    renderBankCards();
+
+    // Amount Button Handlers
+    amountButtons.forEach((button) => {
+        button.addEventListener("click", function () {
+            amountButtons.forEach((b) => b.classList.remove("active"));
+            this.classList.add("active");
+            amountInput.value = this.dataset.amount;
+        });
+    });
+
+    amountInput.addEventListener("input", function () {
+        amountButtons.forEach((b) => b.classList.remove("active"));
+    });
+
+    // Copy Function
+    function copyText(elementId, button) {
+        const element = document.getElementById(elementId);
+        const text = element.textContent.trim();
+
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = button.textContent;
+            button.textContent = "✓ Đã copy";
+            button.classList.add("copied");
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove("copied");
+            }, 2000);
+        }).catch(() => {
+            alert("Không thể copy. Vui lòng copy thủ công.");
+        });
+    }
+
+    // Form Submit
+    rechargeForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        const amount = Number(amountInput.value);
+
+        if (!amount || amount < 10000) {
+            alert("Số tiền nạp tối thiểu là 10,000 VNĐ");
+            return;
+        }
+        if (amount > 10000000) {
+            alert("Số tiền nạp tối đa là 10,000,000 VNĐ");
+            return;
+        }
+
+        const formData = new FormData(this);
+        const response = await fetch("/api/qr", {
+            method: "POST",
+            body: formData
+        });
+
+        const qrUrl = await response.text();
+        showRechargeResult(amount, qrUrl);
+
+    });
+
+    // Show Result
+    function showRechargeResult(amount, qrUrl) {
+        const resultInfo = document.getElementById("resultInfo");
+        const bankOptions = document.getElementById("bankOptions");
+        const rechargeResult = document.getElementById("rechargeResult");
+
+        resultInfo.innerHTML = `
+                <div class="bank-info">
+                    <div class="bank-detail">
+                        <span class="bank-detail-label">Số tiền nạp:</span>
+                        <span class="bank-detail-value" style="color: #059669; font-size: 20px;">
+                            ${parseInt(amount, 10).toLocaleString("vi-VN")} VNĐ
+                        </span>
+                    </div>
+                </div>
+            `;
+
+        bankOptions.innerHTML = "";
+        paymentInfos.forEach((bank, idx) => {
+            const option = document.createElement("div");
+            option.className = "bank-option";
+            option.innerHTML = `
+                    <div class="bank-option-name">${bank.bank_name}</div>
+                    <div class="bank-option-number">${bank.account_number}</div>
+                `;
+
+            option.addEventListener("click", function () {
+                document.querySelectorAll(".bank-option").forEach((el) => el.classList.remove("selected"));
+                this.classList.add("selected");
+                updateQRCode(qrUrl);
+            });
+
+            bankOptions.appendChild(option);
+            if (idx === 0) {
+                option.classList.add("selected");
+                updateQRCode(qrUrl);
+            }
+        });
+
+        rechargeResult.classList.add("show");
+        rechargeResult.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // Update QR Code
+    function updateQRCode(qrUrl) {
+        const img = document.getElementById("qrCodeImage");
+        img.src = qrUrl;
+        img.alt = "QR Code chuyển khoản";
+    }
+</script>
 </body>
 </html>

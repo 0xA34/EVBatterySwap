@@ -30,7 +30,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class UserUIController {
 
-    private final JwtCookieHelper jwtCookieHelper;
+    @Autowired
+    private JwtCookieHelper jwtCookieHelper;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -50,17 +51,16 @@ public class UserUIController {
     @Autowired
     private StationReviewRepository stationReviewRepository;
 
-    public UserUIController(JwtCookieHelper jwtCookieHelper) {
-        this.jwtCookieHelper = jwtCookieHelper;
-    }
-
 
     public void show_info(Model model, String token) {
 
         String username = jwtTokenProvider.extractUsername(token); // lấy username từ token jwt
         Optional<UserProfileDTO> user = userService.findByUsername(username);
+
+        String formattedMoney = String.format("%,.0f VND", user.get().getWalletBalance());
+
         model.addAttribute("username", user.get().getUsername());
-        model.addAttribute("walletBalance", user.get().getWalletBalance());
+        model.addAttribute("walletBalance", formattedMoney);
         model.addAttribute("InfoUser", user);
     }
 
@@ -115,6 +115,7 @@ public class UserUIController {
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
             show_info(model, token);
+
             return "user/topup";
         }
         return "login";
