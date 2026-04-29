@@ -16,6 +16,15 @@
         <section class="content">
             <div class="container-fluid">
 
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <i class="fas fa-check-circle mr-1"></i> <span th:text="${successMessage}"></span>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    <i class="fas fa-exclamation-triangle mr-1"></i> <span th:text="${errorMessage}"></span>
+                </div>
+
                 <div class="card">
                     <div class="card-body p-0">
                         <table class="table table-striped">
@@ -30,7 +39,23 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr>
+                            <tr th:each="r : ${reservationPage.content}">
+                                <td th:text="${r.id}"></td>
+                                <td th:text="${r.user.fullName}"></td>
+                                <td th:text="${r.battery.serialNumber}"></td>
+                                <td th:text="${#temporals.format(r.reservationTime, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td th:text="${#temporals.format(r.expiresAt, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td>
+                                    <button class="btn btn-success btn-sm"
+                                            th:data-id="${r.id}"
+                                            th:data-user="${r.user.fullName}"
+                                            th:data-battery="${r.battery.serialNumber}"
+                                            onclick="openCheckinModal(this)">
+                                        <i class="fas fa-check"></i> Check-in
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr th:if="${reservationPage.empty}">
                                 <td colspan="6" class="text-center py-4 text-muted">
                                     <i class="fas fa-calendar-times fa-2x mb-2"></i><br>
                                     Hiện không có khách đặt lịch nào đang chờ.
@@ -38,6 +63,20 @@
                             </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="card-footer clearfix" th:if="${reservationPage.totalPages > 1}">
+                        <ul class="pagination pagination-sm m-0 float-right">
+                            <li class="page-item" th:classappend="${reservationPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/staff/reservations(page=${reservationPage.number - 1})}">«</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, reservationPage.totalPages - 1)}"
+                                th:classappend="${i == reservationPage.number} ? 'active'">
+                                <a class="page-link" th:href="@{/staff/reservations(page=${i})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${reservationPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/staff/reservations(page=${reservationPage.number + 1})}">»</a>
+                            </li>
+                        </ul>
                     </div>
 
                 </div>
@@ -72,6 +111,7 @@
                         <label>Pin Khách Trả lại (Pin cũ):</label>
                         <select name="batteryInId" class="form-control" required id="batteryInSelect">
                             <option value="">-- Chọn pin cũ khách trả --</option>
+                            <option th:each="b : ${rentedBatteries}" th:value="${b.id}" th:text="${b.serialNumber + ' - ' + b.model}"></option>
                         </select>
                         <small class="form-text text-muted">Hệ thống tự động lọc danh sách pin mà khách này đang thuê.</small>
                     </div>
@@ -93,6 +133,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    function openCheckinModal(btn) {
+        var resId = btn.getAttribute('data-id');
+        var userName = btn.getAttribute('data-user');
+        var batterySerial = btn.getAttribute('data-battery');
+
+        document.getElementById('modalResId').value = resId;
+        document.getElementById('modalUser').innerText = userName;
+        document.getElementById('modalBatteryOut').innerText = batterySerial;
+
+        $('#checkinModal').modal('show');
+    }
+</script>
 
 </body>
 </html>

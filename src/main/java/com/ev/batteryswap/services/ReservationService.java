@@ -71,6 +71,12 @@ public class ReservationService {
             .orElseThrow(() ->
                 new RuntimeException("Người dùng không tồn tại")
             );
+
+        if ("DRIVER".equals(user.getRole())) {
+            if (reservationRepository.existsByUserIdAndStatus(userId, "PENDING")) {
+                throw new RuntimeException("Bạn đã có một lịch hẹn hoặc đang đổi pin. Vui lòng hoàn thành giao dịch hiện tại trước khi đặt mới!");
+            }
+        }
         Station station = stationRepository
             .findById(stationId)
             .orElseThrow(() -> new RuntimeException("Trạm không tồn tại"));
@@ -163,7 +169,7 @@ public class ReservationService {
         transaction.setUser(reservation.getUser());
         transaction.setBatteryIn(batteryIn);
         transaction.setBatteryOut(batteryOut);
-        transaction.setAmount(batteryOut.getAmount()); // Hoặc tính toán lại
+        transaction.setAmount(batteryOut.getAmount() != null ? batteryOut.getAmount() : java.math.BigDecimal.ZERO);
         transaction.setPaymentMethod(paymentMethod);
         transaction.setPaymentStatus("COMPLETED"); // Giả sử thanh toán luôn tại quầy
         transaction.setNotes("Giao dịch từ đơn đặt lịch #" + reservationId);
@@ -174,7 +180,7 @@ public class ReservationService {
         batteryIn.setStatus("CHARGING");
         batteryIn.setStation(reservation.getStation());
         batteryIn.setUser(null);
-        batteryRepository.save(batteryIn);
+        batteryRepository.saveAndFlush(batteryIn);
 
         // pin giao cho khách
         batteryOut.setStatus("RENTED");

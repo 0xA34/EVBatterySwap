@@ -35,6 +35,7 @@ public class Reservation {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @org.hibernate.annotations.CreationTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private Instant createdAt;

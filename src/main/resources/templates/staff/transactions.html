@@ -15,7 +15,41 @@
                     <div class="card-body p-0">
                         <table class="table table-striped">
                             <thead><tr><th>ID</th><th>Pin cũ</th><th>Pin mới</th><th>Số tiền</th><th>Trạng thái TT</th><th>Ngày tạo</th></tr></thead>
+                            <tbody>
+                                <tr th:each="t : ${transactionPage.content}">
+                                    <td th:text="${t.id}">1</td>
+                                    <td><span th:text="${t.batteryIn != null ? t.batteryIn.serialNumber : ''}"></span></td>
+                                    <td><span th:text="${t.batteryOut != null ? t.batteryOut.serialNumber : ''}"></span></td>
+                                    <td th:text="${t.amount != null ? #numbers.formatDecimal(t.amount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${t.paymentStatus == 'COMPLETED' ? 'badge-success' : (t.paymentStatus == 'PENDING' ? 'badge-warning' : 'badge-danger')}"
+                                              th:text="${t.paymentStatus == 'COMPLETED' ? 'Đã thanh toán' : (t.paymentStatus == 'PENDING' ? 'Chưa thanh toán' : 'Thất bại')}">
+                                        </span>
+                                    </td>
+                                    <td th:text="${t.createdAt != null ? #temporals.format(t.createdAt, 'dd/MM/yyyy HH:mm') : ''}"></td>
+                                </tr>
+                                <tr th:if="${transactionPage.empty}">
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        Không có giao dịch nào.
+                                    </td>
+                                </tr>
+                            </tbody>
                         </table>
+                    </div>
+                    <div class="card-footer clearfix" th:if="${transactionPage.totalPages > 1}">
+                        <ul class="pagination pagination-sm m-0 float-right">
+                            <li class="page-item" th:classappend="${transactionPage.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/staff/transactions(page=${transactionPage.number - 1}, search=${search})}">«</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, transactionPage.totalPages - 1)}"
+                                th:classappend="${i == transactionPage.number} ? 'active'">
+                                <a class="page-link" th:href="@{/staff/transactions(page=${i}, search=${search})}" th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${transactionPage.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/staff/transactions(page=${transactionPage.number + 1}, search=${search})}">»</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>

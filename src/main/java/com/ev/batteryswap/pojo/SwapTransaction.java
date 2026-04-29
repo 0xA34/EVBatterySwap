@@ -54,6 +54,7 @@ public class SwapTransaction {
     @Column(name = "notes")
     private String notes;
 
+    @org.hibernate.annotations.CreationTimestamp
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
     private Instant createdAt;

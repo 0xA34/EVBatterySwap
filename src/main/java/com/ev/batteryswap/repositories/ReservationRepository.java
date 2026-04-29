@@ -13,4 +13,5 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Integer>, JpaSpecificationExecutor<Reservation> {
     Page<Reservation> findByStationIdAndStatus(Integer stationId, String status, Pageable pageable);
     List<Reservation> findByUserIdOrderByReservationTimeDesc(Integer userId);
+    boolean existsByUserIdAndStatus(Integer userId, String status);
 }

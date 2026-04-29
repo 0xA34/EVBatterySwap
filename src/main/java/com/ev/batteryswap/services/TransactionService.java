@@ -91,7 +91,7 @@ public class TransactionService implements ITransactionService {
 
         // 2. Tự động cập nhật trạng thái của các viên pin
         batteryIn.setStatus("CHARGING");
-        batteryIn.setStation(transaction.getBatteryIn().getStation()); // Cập nhật vị trí mới cho pin cũ ? could be a bug?
+        batteryIn.setStation(transaction.getStation()); // Cập nhật vị trí mới cho pin cũ về trạm hiện tại
         batteryIn.setUser(null);
 
         batteryOut.setStatus("RENTED"); // Pin mới giờ đã được cho thuê
@@ -99,7 +99,7 @@ public class TransactionService implements ITransactionService {
         batteryOut.setUser(transaction.getUser());
 
         // 3. Lưu lại trạng thái mới của 2 viên pin
-        batteryRepository.save(batteryIn);
+        batteryRepository.saveAndFlush(batteryIn);
         batteryRepository.save(batteryOut);
 
         transactionRepository.save(transaction);
