@@ -9,6 +9,7 @@ import java.util.Map;
 
 public interface IStationService {
     Page<Station> filterStations(String search, Pageable pageable);
+    Page<Station> filterStationsByLocation(Integer tinhId, Integer huyenId, Integer xaId, Pageable pageable);
     Map<String, Long> getStationStatistics();
     Station saveStation(Station station);
     void deleteStation(Integer id);

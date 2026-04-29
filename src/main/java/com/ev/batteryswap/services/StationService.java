@@ -9,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -34,6 +36,26 @@ public class StationService implements IStationService {
                 );
             }
             return cb.conjunction();
+        }, pageable);
+    }
+
+    @Override
+    public Page<Station> filterStationsByLocation(Integer tinhId, Integer huyenId, Integer xaId, Pageable pageable) {
+        return stationRepository.findAll((Specification<Station>) (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (tinhId != null) {
+                predicates.add(cb.equal(root.get("province").get("id"), tinhId));
+            }
+            if (huyenId != null) {
+                predicates.add(cb.equal(root.get("quan").get("id"), huyenId));
+            }
+            if (xaId != null) {
+                predicates.add(cb.equal(root.get("phuongxa").get("id"), xaId));
+            }
+            // Mặc định chỉ lấy trạm ACTIVE
+            predicates.add(cb.equal(root.get("status"), "ACTIVE"));
+            
+            return cb.and(predicates.toArray(new Predicate[0]));
         }, pageable);
     }
 
