@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đặt lịch thay pin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet" />
     <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
     <style>
         /* Override all custom arrow effects from main CSS */
@@ -39,370 +42,436 @@
         }
 
         /* Fix text height for search selects */
-        #tinhSelect, #huyenSelect, #xaSelect {
+        #tinhSelect,
+        #huyenSelect,
+        #xaSelect {
             padding: 4px 8px !important;
             height: 34px !important;
             min-height: 34px !important;
         }
-        
+
         @media (max-width: 768px) {
             .schedule-two-columns {
                 grid-template-columns: 1fr !important;
             }
         }
+
+        .time-btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 500;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .time-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #94a3b8;
+        }
     </style>
 </head>
+
 <body>
 
-<div th:replace="~{user/fragments/header :: site-header-user}"></div>
+    <div th:replace="~{user/fragments/header :: site-header-user}"></div>
 
-<main class="schedule">
-    <div class="container">
-        <div class="contact-form-wrapper" style="max-width: 1150px; margin: 0 auto;">
-            <div class="schedule-two-columns" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
-                
-                <!-- Left Form: Search -->
-                <div class="form-card">
-                    <div class="form-header">
-                        <h1 class="form-title" style="font-size: 24px;">Tra cứu khu vực</h1>
-                        <p>Chọn tỉnh thành để tìm pin</p>
+    <main class="schedule">
+        <div class="container">
+            <div class="contact-form-wrapper" style="max-width: 1150px; margin: 0 auto;">
+                <div class="schedule-two-columns" style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+
+                    <!-- Left Form: Search -->
+                    <div class="form-card">
+                        <div class="form-header">
+                            <h1 class="form-title" style="font-size: 24px;">Tra cứu khu vực</h1>
+                            <p>Chọn tỉnh thành để tìm pin</p>
+                        </div>
+
+                        <form id="searchForm" class="contact-form">
+                            <div
+                                style="margin-bottom: 24px; font-size: 14px; color: #64748b; background-color: #f8fafc; padding: 12px; border-radius: 6px;">
+                                Xin vui lòng nhập đầy đủ các thông tin cần thiết
+                            </div>
+
+                            <div class="search-grid"
+                                style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+                                <!-- Tỉnh/TP -->
+                                <div>
+                                    <div style="margin-bottom: 4px;">
+                                        <label style="font-size: 13px; color: #555; margin: 0;">Tỉnh/TP <span
+                                                style="color:red">*</span></label>
+                                    </div>
+                                    <select id="tinhSelect" class="field-select"
+                                        style="width: 100%; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 13px; border-radius: 4px; margin-top: 0;">
+                                        <option value="">-- Chọn tỉnh/TP --</option>
+                                    </select>
+                                </div>
+
+                                <!-- Quận/Huyện -->
+                                <div>
+                                    <div style="margin-bottom: 4px;">
+                                        <label style="font-size: 13px; color: #555; margin: 0;">Quận/Huyện <span
+                                                style="color:red">*</span></label>
+                                    </div>
+                                    <select id="huyenSelect" class="field-select"
+                                        style="width: 100%; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 13px; border-radius: 4px; margin-top: 0;"
+                                        disabled>
+                                        <option value="">-- Chọn quận/huyện --</option>
+                                    </select>
+                                </div>
+
+                                <!-- Phường/Xã -->
+                                <div>
+                                    <div style="margin-bottom: 4px;">
+                                        <label style="font-size: 13px; color: #555; margin: 0;">Phường/Xã <span
+                                                style="color:red">*</span></label>
+                                    </div>
+                                    <select id="xaSelect" class="field-select"
+                                        style="width: 100%; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 13px; border-radius: 4px; margin-top: 0;"
+                                        disabled>
+                                        <option value="">-- Chọn phường/xã --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 16px;">
+                                <button type="button" id="btnSearch" class="submit-button" style="flex: 1;">Tra
+                                    cứu</button>
+                                <button type="button" id="btnReset" class="submit-button"
+                                    style="flex: 1; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">Nhập
+                                    lại</button>
+                            </div>
+                        </form>
                     </div>
 
-                    <form id="searchForm" class="contact-form">
-                        <div style="margin-bottom: 24px; font-size: 14px; color: #64748b; background-color: #f8fafc; padding: 12px; border-radius: 6px;">
-                            Xin vui lòng nhập đầy đủ các thông tin cần thiết
+                    <!-- Right Form: Schedule -->
+                    <div class="form-card" id="rightFormCard"
+                        style="opacity: 0.5; pointer-events: none; position: relative;">
+                        <div id="rightFormOverlay"
+                            style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.7); z-index: 10; display: flex; align-items: center; justify-content: center; border-radius: inherit;">
+                            <span
+                                style="background: #334155; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); font-weight: 500;">Vui
+                                lòng tra cứu khu vực trước</span>
                         </div>
-                        
-                        <div class="search-grid" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
-                            <!-- Tỉnh/TP -->
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                                    <label style="font-size: 13px; color: #555; margin: 0; white-space: nowrap;">Tỉnh/TP <span style="color:red">*</span></label>
-                                    <input type="text" id="tinhCodeInput" style="width: 40px; padding: 4px; border: 1px solid #cbd5e1; height: 28px; border-radius: 2px; font-size: 13px; text-align: center;" title="Mã tỉnh" placeholder="Mã" readonly />
-                                </div>
-                                <select id="tinhSelect" class="field-select" style="width: 100%; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 13px; border-radius: 4px; margin-top: 0;">
-                                    <option value="">-- Chọn tỉnh/TP --</option>
+
+                        <div class="form-header">
+                            <h1 class="form-title" style="font-size: 24px;">Thông tin đặt lịch</h1>
+                            <p>Chọn pin và thời gian thuê</p>
+                        </div>
+
+                        <form id="scheduleForm" class="contact-form" novalidate>
+                            <div class="field">
+                                <label class="label">Chọn trạm</label>
+                                <select id="stationSelect" class="field-select" required disabled>
+                                    <option value="">-- Chọn trạm --</option>
                                 </select>
                             </div>
 
-                            <!-- Quận/Huyện -->
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                                    <label style="font-size: 13px; color: #555; margin: 0; white-space: nowrap;">Quận/Huyện <span style="color:red">*</span></label>
-                                    <input type="text" id="huyenCodeInput" style="width: 40px; padding: 4px; border: 1px solid #cbd5e1; height: 28px; border-radius: 2px; font-size: 13px; text-align: center;" title="Mã quận/huyện" placeholder="Mã" readonly />
-                                </div>
-                                <select id="huyenSelect" class="field-select" style="width: 100%; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 13px; border-radius: 4px; margin-top: 0;" disabled>
-                                    <option value="">-- Chọn quận/huyện --</option>
+                            <div class="field">
+                                <label class="label">Danh sách pin</label>
+                                <select id="pinSelect" class="field-select" required disabled>
+                                    <option value="">-- Chọn pin --</option>
                                 </select>
                             </div>
 
-                            <!-- Phường/Xã -->
-                            <div>
-                                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-                                    <label style="font-size: 13px; color: #555; margin: 0; white-space: nowrap;">Phường/Xã <span style="color:red">*</span></label>
-                                    <input type="text" id="xaCodeInput" style="width: 40px; padding: 4px; border: 1px solid #cbd5e1; height: 28px; border-radius: 2px; font-size: 13px; text-align: center;" title="Mã phường/xã" placeholder="Mã" readonly />
-                                </div>
-                                <select id="xaSelect" class="field-select" style="width: 100%; height: 34px; padding: 4px 8px; border: 1px solid #cbd5e1; font-size: 13px; border-radius: 4px; margin-top: 0;" disabled>
-                                    <option value="">-- Chọn phường/xã --</option>
-                                </select>
+                            <div class="form-row" style="display: flex; gap: 16px; margin-bottom: 8px;">
+                                <label class="field" style="flex: 1; margin-bottom: 0;">
+                                    <span class="label">Thời gian bắt đầu</span>
+                                    <input type="datetime-local" id="startTime" required
+                                        style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit;">
+                                </label>
+                                <label class="field" style="flex: 1; margin-bottom: 0;">
+                                    <span class="label">Thời gian kết thúc</span>
+                                    <input type="datetime-local" id="endTime" required
+                                        style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit;">
+                                </label>
                             </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 16px;">
-                            <button type="button" id="btnSearch" class="submit-button" style="flex: 1;">Tra cứu</button>
-                            <button type="button" id="btnReset" class="submit-button" style="flex: 1; background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">Nhập lại</button>
-                        </div>
-                    </form>
-                </div>
 
-                <!-- Right Form: Schedule -->
-                <div class="form-card">
-                    <div class="form-header">
-                        <h1 class="form-title" style="font-size: 24px;">Thông tin đặt lịch</h1>
-                        <p>Chọn pin và thời gian thuê</p>
+                            <div class="quick-time-selection"
+                                style="display: flex; gap: 8px; margin-top: 0; flex-wrap: wrap;">
+                                <button type="button" class="time-btn" data-minutes="20">+20 Phút</button>
+                                <button type="button" class="time-btn" data-minutes="30">+30 Phút</button>
+                                <button type="button" class="time-btn" data-minutes="40">+40 Phút</button>
+                                <button type="button" class="time-btn" data-minutes="60">+1 Giờ</button>
+                                <button type="button" class="time-btn" data-minutes="120">+2 Giờ</button>
+                                <button type="button" class="time-btn" data-minutes="180">+3 Giờ</button>
+                            </div>
+
+                            <div class="field" style="margin-top: 8px;">
+                                <span style="font-size: 13px; color: #64748b; font-style: italic;">* Kiểu đặt lịch: Giới
+                                    hạn trong phạm vi 3 tiếng.</span>
+                            </div>
+
+                            <button type="submit" id="btnBook" class="submit-button" style="margin-top: 16px;">Đặt
+                                lịch</button>
+                        </form>
                     </div>
 
-                    <form id="scheduleForm" class="contact-form" novalidate>
-                        <div class="field">
-                            <label class="label">Chọn trạm</label>
-                            <select id="stationSelect" class="field-select" required disabled>
-                                <option value="">-- Chọn trạm --</option>
-                            </select>
-                        </div>
-
-                        <div class="field">
-                            <label class="label">Danh sách pin</label>
-                            <select id="pinSelect" class="field-select" required disabled>
-                                <option value="">-- Chọn pin --</option>
-                            </select>
-                        </div>
-
-                        <div class="form-row">
-                            <label class="field">
-                                <span class="label">Thời điểm bắt đầu</span>
-                                <input type="datetime-local" id="startTime" required style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit;">
-                            </label>
-                        </div>
-
-                        <div class="form-row" style="margin-top: 16px;">
-                            <label class="field">
-                                <span class="label">Thời điểm kết thúc</span>
-                                <input type="datetime-local" id="endTime" required style="width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit;">
-                            </label>
-                        </div>
-                        
-                        <div class="field" style="margin-top: 8px;">
-                            <span style="font-size: 13px; color: #64748b; font-style: italic;">* Kiểu đặt lịch: Giới hạn trong phạm vi 3 tiếng.</span>
-                        </div>
-
-                        <button type="submit" id="btnBook" class="submit-button" style="margin-top: 16px;">Đặt lịch</button>
-                    </form>
                 </div>
-
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<div th:replace="~{user/fragments/footer :: site-footer}"></div>
+    <div th:replace="~{user/fragments/footer :: site-footer}"></div>
 
 
-<script>
-    const tinhSelect   = document.getElementById('tinhSelect');
-    const huyenSelect  = document.getElementById('huyenSelect');
-    const xaSelect     = document.getElementById('xaSelect');
-    const stationSelect = document.getElementById('stationSelect');
-    const pinSelect    = document.getElementById('pinSelect');
+    <script>
+        const tinhSelect = document.getElementById('tinhSelect');
+        const huyenSelect = document.getElementById('huyenSelect');
+        const xaSelect = document.getElementById('xaSelect');
+        const stationSelect = document.getElementById('stationSelect');
+        const pinSelect = document.getElementById('pinSelect');
 
-    const tinhCodeInput = document.getElementById('tinhCodeInput');
-    const huyenCodeInput = document.getElementById('huyenCodeInput');
-    const xaCodeInput = document.getElementById('xaCodeInput');
-
-    // ---- Load tỉnh/tp khi trang mở ----
-    document.addEventListener('DOMContentLoaded', async function() {
-        try {
-            const res = await fetch('/api/user/reservations/location/tinhthanh');
-            if (res.ok) {
-                const list = await res.json();
-                tinhSelect.innerHTML = '<option value="">-- Chọn tỉnh/TP --</option>';
-                list.forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id;
-                    opt.textContent = t.ten;
-                    tinhSelect.appendChild(opt);
-                });
-            }
-        } catch(e) { console.error(e); }
-    });
-
-    // ---- Chọn tỉnh → load huyện ----
-    tinhSelect.addEventListener('change', async function() {
-        const tinhId = this.value;
-        tinhCodeInput.value = tinhId || '';
-        huyenCodeInput.value = '';
-        xaCodeInput.value = '';
-        
-        huyenSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
-        huyenSelect.disabled = true;
-        xaSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
-        xaSelect.disabled = true;
-        if (!tinhId) return;
-        try {
-            const res = await fetch(`/api/user/reservations/location/quanhuyen/${tinhId}`);
-            if (res.ok) {
-                const list = await res.json();
-                list.forEach(q => {
-                    const opt = document.createElement('option');
-                    opt.value = q.id;
-                    opt.textContent = q.ten;
-                    huyenSelect.appendChild(opt);
-                });
-                huyenSelect.disabled = false;
-            }
-        } catch(e) { console.error(e); }
-    });
-
-    // ---- Chọn huyện → load phường/xã ----
-    huyenSelect.addEventListener('change', async function() {
-        const huyenId = this.value;
-        huyenCodeInput.value = huyenId || '';
-        xaCodeInput.value = '';
-        
-        xaSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
-        xaSelect.disabled = true;
-        if (!huyenId) return;
-        try {
-            const res = await fetch(`/api/user/reservations/location/phuongxa/${huyenId}`);
-            if (res.ok) {
-                const list = await res.json();
-                list.forEach(p => {
-                    const opt = document.createElement('option');
-                    opt.value = p.id;
-                    opt.textContent = p.ten;
-                    xaSelect.appendChild(opt);
-                });
-                xaSelect.disabled = list.length === 0;
-            }
-        } catch(e) { console.error(e); }
-    });
-    
-    xaSelect.addEventListener('change', function() {
-        xaCodeInput.value = this.value || '';
-    });
-
-    document.getElementById('btnSearch').addEventListener('click', function() {
-        const tinhId  = tinhSelect.value;
-        const huyenId = huyenSelect.value;
-        const xaId    = xaSelect.value;
-        
-        if (!tinhId) {
-            alert('Vui lòng chọn tỉnh/TP để tra cứu.');
-            return;
-        }
-        if (!huyenId) {
-            alert('Vui lòng chọn quận/huyện để tra cứu.');
-            return;
-        }
-        if (!xaId) {
-            alert('Vui lòng chọn phường/xã để tra cứu.');
-            return;
-        }
-
-        const xaName = xaSelect.options[xaSelect.selectedIndex].text;
-
-        stationSelect.innerHTML = '<option value="">-- Chọn trạm --</option>';
-        pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
-        stationSelect.disabled = true;
-        pinSelect.disabled = true;
-
-        fetch(`/api/user/reservations/stations/by-xa/${xaId}`)
-            .then(r => r.json())
-            .then(stations => {
-                if (stations.length === 0) {
-                    alert('Không tìm thấy trạm nào ở khu vực phường/xã này.');
-                    return;
+        // ---- Load tỉnh/tp khi trang mở ----
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                const res = await fetch('/api/user/reservations/location/tinhthanh');
+                if (res.ok) {
+                    const list = await res.json();
+                    tinhSelect.innerHTML = '<option value="">-- Chọn tỉnh/TP --</option>';
+                    list.forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t.id;
+                        opt.textContent = t.ten;
+                        tinhSelect.appendChild(opt);
+                    });
                 }
-                stations.forEach(station => {
-                    const opt = document.createElement('option');
-                    opt.value = station.id;
-                    opt.textContent = station.name + " (" + station.address + ")";
-                    opt.dataset.name = station.name;
-                    stationSelect.appendChild(opt);
-                });
-                stationSelect.disabled = false;
-                alert('Đã tải ' + stations.length + ' trạm ở ' + xaName);
-            })
-            .catch(e => console.error(e));
-    });
+            } catch (e) { console.error(e); }
+        });
 
-    document.getElementById('btnReset').addEventListener('click', function() {
-        document.getElementById('searchForm').reset();
-        
-        tinhCodeInput.value = '';
-        huyenCodeInput.value = '';
-        xaCodeInput.value = '';
-        
-        tinhSelect.innerHTML = tinhSelect.innerHTML; // giữ options tỉnh đã load
-        huyenSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
-        huyenSelect.disabled = true;
-        xaSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
-        xaSelect.disabled = true;
+        // ---- Chọn tỉnh → load huyện ----
+        tinhSelect.addEventListener('change', async function () {
+            const tinhId = this.value;
 
-        // Reset right side as well
-        stationSelect.innerHTML = '<option value="">-- Chọn trạm --</option>';
-        pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
-        stationSelect.disabled = true;
-        pinSelect.disabled = true;
-        document.getElementById('startTime').value = '';
-        document.getElementById('endTime').value = '';
-    });
+            huyenSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+            huyenSelect.disabled = true;
+            xaSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+            xaSelect.disabled = true;
+            if (!tinhId) return;
+            try {
+                const res = await fetch(`/api/user/reservations/location/quanhuyen/${tinhId}`);
+                if (res.ok) {
+                    const list = await res.json();
+                    list.forEach(q => {
+                        const opt = document.createElement('option');
+                        opt.value = q.id;
+                        opt.textContent = q.ten;
+                        huyenSelect.appendChild(opt);
+                    });
+                    huyenSelect.disabled = false;
+                }
+            } catch (e) { console.error(e); }
+        });
 
-    stationSelect.addEventListener('change', async function() {
-        const stationId = this.value;
-        pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
-        pinSelect.disabled = true;
+        // ---- Chọn huyện → load phường/xã ----
+        huyenSelect.addEventListener('change', async function () {
+            const huyenId = this.value;
 
-        if (!stationId) return;
+            xaSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+            xaSelect.disabled = true;
+            if (!huyenId) return;
+            try {
+                const res = await fetch(`/api/user/reservations/location/phuongxa/${huyenId}`);
+                if (res.ok) {
+                    const list = await res.json();
+                    list.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.id;
+                        opt.textContent = p.ten;
+                        xaSelect.appendChild(opt);
+                    });
+                    xaSelect.disabled = list.length === 0;
+                }
+            } catch (e) { console.error(e); }
+        });
 
-        try {
-            const res = await fetch(`/api/user/reservations/stations/${stationId}/batteries`);
-            if (res.ok) {
-                const batteries = await res.json();
-                batteries.forEach(pin => {
-                    const opt = document.createElement('option');
-                    opt.value = pin.id;
-                    opt.textContent = pin.serialNumber + " - " + pin.capacity;
-                    opt.dataset.name = pin.serialNumber;
-                    pinSelect.appendChild(opt);
-                });
-                pinSelect.disabled = batteries.length === 0;
+        document.getElementById('btnSearch').addEventListener('click', function () {
+            const tinhId = tinhSelect.value;
+            const huyenId = huyenSelect.value;
+            const xaId = xaSelect.value;
+
+            if (!tinhId) {
+                alert('Vui lòng chọn tỉnh/TP để tra cứu.');
+                return;
             }
-        } catch (e) {
-            console.error(e);
-        }
-    });
+            if (!huyenId) {
+                alert('Vui lòng chọn quận/huyện để tra cứu.');
+                return;
+            }
+            if (!xaId) {
+                alert('Vui lòng chọn phường/xã để tra cứu.');
+                return;
+            }
 
+            const xaName = xaSelect.options[xaSelect.selectedIndex].text;
 
+            stationSelect.innerHTML = '<option value="">-- Chọn trạm --</option>';
+            pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
+            stationSelect.disabled = true;
+            pinSelect.disabled = true;
 
-    document.getElementById('scheduleForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const startTimeVal = document.getElementById('startTime').value;
-        const endTimeVal = document.getElementById('endTime').value;
+            fetch(`/api/user/reservations/stations/by-xa/${xaId}`)
+                .then(r => r.json())
+                .then(stations => {
+                    if (stations.length === 0) {
+                        alert('Không tìm thấy trạm nào ở khu vực phường/xã này.');
+                        return;
+                    }
+                    stations.forEach(station => {
+                        const opt = document.createElement('option');
+                        opt.value = station.id;
+                        opt.textContent = station.name + " (" + station.address + ")";
+                        opt.dataset.name = station.name;
+                        stationSelect.appendChild(opt);
+                    });
+                    stationSelect.disabled = false;
+                    document.getElementById('rightFormCard').style.opacity = '1';
+                    document.getElementById('rightFormCard').style.pointerEvents = 'auto';
+                    document.getElementById('rightFormOverlay').style.display = 'none';
+                    alert('Đã tải ' + stations.length + ' trạm ở ' + xaName);
+                })
+                .catch(e => console.error(e));
+        });
 
-        if (!stationSelect.value || !pinSelect.value || !startTimeVal || !endTimeVal) {
-            alert('Vui lòng chọn đầy đủ thông tin (trạm, pin, thời gian bắt đầu, thời gian kết thúc).');
-            return;
-        }
+        document.getElementById('btnReset').addEventListener('click', function () {
+            document.getElementById('searchForm').reset();
 
-        const startDate = new Date(startTimeVal);
-        const endDate = new Date(endTimeVal);
-        
-        if (endDate <= startDate) {
-            alert('Thời gian kết thúc phải lớn hơn thời gian bắt đầu.');
-            return;
-        }
-        
-        const diffHours = (endDate - startDate) / (1000 * 60 * 60);
-        if (diffHours > 3) {
-            alert('Kiểu đặt lịch không hợp lệ: Thời gian đặt lịch tối đa trong phạm vi 3 tiếng.');
-            return;
-        }
+            tinhSelect.innerHTML = tinhSelect.innerHTML; // giữ options tỉnh đã load
+            huyenSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+            huyenSelect.disabled = true;
+            xaSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+            xaSelect.disabled = true;
 
-        const submitBtn = this.querySelector('.submit-button');
-        const oldText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Đang xử lý...';
+            // Reset right side as well
+            stationSelect.innerHTML = '<option value="">-- Chọn trạm --</option>';
+            pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
+            stationSelect.disabled = true;
+            pinSelect.disabled = true;
+            document.getElementById('startTime').value = '';
+            document.getElementById('endTime').value = '';
 
-        try {
-            const payload = {
-                stationId: stationSelect.value,
-                batteryId: pinSelect.value,
-                pickupTime: startTimeVal,
-                endTime: endTimeVal // Thêm endTime trong payload
-            };
+            document.getElementById('rightFormCard').style.opacity = '0.5';
+            document.getElementById('rightFormCard').style.pointerEvents = 'none';
+            document.getElementById('rightFormOverlay').style.display = 'flex';
+        });
 
-            const response = await fetch('/api/user/reservations/book', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+        // Quick time selection logic
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                let startInput = document.getElementById('startTime');
+                let endInput = document.getElementById('endTime');
+                let startDate;
+
+                if (!startInput.value) {
+                    startDate = new Date();
+                    startDate.setMinutes(startDate.getMinutes() + 5); // Add 5 mins buffer for convenience
+                } else {
+                    startDate = new Date(startInput.value);
+                }
+
+                const tzOffset = startDate.getTimezoneOffset() * 60000;
+                const localStart = new Date(startDate.getTime() - tzOffset);
+                startInput.value = localStart.toISOString().slice(0, 16);
+
+                const minutes = parseInt(this.getAttribute('data-minutes'));
+                const endDate = new Date(startDate.getTime() + minutes * 60 * 1000);
+                const localEnd = new Date(endDate.getTime() - tzOffset);
+                endInput.value = localEnd.toISOString().slice(0, 16);
             });
+        });
 
-            const result = await response.json();
-            if (response.ok && result.success) {
-                alert('Đặt lịch thành công!');
-                window.location.href = '/user/my';
-            } else {
-                alert(result.message || 'Có lỗi xảy ra.');
+        stationSelect.addEventListener('change', async function () {
+            const stationId = this.value;
+            pinSelect.innerHTML = '<option value="">-- Chọn pin --</option>';
+            pinSelect.disabled = true;
+
+            if (!stationId) return;
+
+            try {
+                const res = await fetch(`/api/user/reservations/stations/${stationId}/batteries`);
+                if (res.ok) {
+                    const batteries = await res.json();
+                    batteries.forEach(pin => {
+                        const opt = document.createElement('option');
+                        opt.value = pin.id;
+                        opt.textContent = pin.serialNumber + " - " + pin.capacity;
+                        opt.dataset.name = pin.serialNumber;
+                        pinSelect.appendChild(opt);
+                    });
+                    pinSelect.disabled = batteries.length === 0;
+                }
+            } catch (e) {
+                console.error(e);
             }
-        } catch (err) {
-            console.error(err);
-            alert('Lỗi kết nối máy chủ!');
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = oldText;
-        }
-    });
-</script>
+        });
+
+
+
+        document.getElementById('scheduleForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const startTimeVal = document.getElementById('startTime').value;
+            const endTimeVal = document.getElementById('endTime').value;
+
+            if (!stationSelect.value || !pinSelect.value || !startTimeVal || !endTimeVal) {
+                alert('Vui lòng chọn đầy đủ thông tin (trạm, pin, thời gian bắt đầu, thời gian kết thúc).');
+                return;
+            }
+
+            const startDate = new Date(startTimeVal);
+            const endDate = new Date(endTimeVal);
+
+            if (endDate <= startDate) {
+                alert('Thời gian kết thúc phải lớn hơn thời gian bắt đầu.');
+                return;
+            }
+
+            const diffHours = (endDate - startDate) / (1000 * 60 * 60);
+            if (diffHours > 3) {
+                alert('Kiểu đặt lịch không hợp lệ: Thời gian đặt lịch tối đa trong phạm vi 3 tiếng.');
+                return;
+            }
+
+            const submitBtn = this.querySelector('.submit-button');
+            const oldText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang xử lý...';
+
+            try {
+                const payload = {
+                    stationId: stationSelect.value,
+                    batteryId: pinSelect.value,
+                    pickupTime: startTimeVal,
+                    endTime: endTimeVal // Thêm endTime trong payload
+                };
+
+                const response = await fetch('/api/user/reservations/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                if (response.ok && result.success) {
+                    alert('Đặt lịch thành công!');
+                    window.location.href = '/user/my';
+                } else {
+                    alert(result.message || 'Có lỗi xảy ra.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ!');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = oldText;
+            }
+        });
+    </script>
 </body>
+
 </html>
