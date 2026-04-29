@@ -1,17 +1,22 @@
 package com.ev.batteryswap.controllers.user;
 import com.ev.batteryswap.controllers.AuthController;
 import com.ev.batteryswap.dto.UserProfileDTO;
+import com.ev.batteryswap.pojo.PaymentInfo;
 import com.ev.batteryswap.security.JwtCookieHelper;
+import com.ev.batteryswap.services.PaymentInfoService;
+import com.ev.batteryswap.services.BatteryService;
+import com.ev.batteryswap.services.StationService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import com.ev.batteryswap.security.JwtTokenProvider;
 import com.ev.batteryswap.services.UserService;
-import com.ev.batteryswap.services.interfaces.IStationService;
-import com.ev.batteryswap.services.interfaces.IBatteryService;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.Optional;
 
 @Controller
@@ -26,10 +31,14 @@ public class UserUIController {
     private UserService userService;
 
     @Autowired
-    private IStationService stationService;
+    private PaymentInfoService paymentInfoService;
 
     @Autowired
-    private IBatteryService batteryService;
+    private BatteryService batteryService;
+
+    @Autowired
+    private StationService stationService;
+
 
     public UserUIController(JwtCookieHelper jwtCookieHelper) {
         this.jwtCookieHelper = jwtCookieHelper;
@@ -101,6 +110,30 @@ public class UserUIController {
         return "login";
     }
 
+
+    @GetMapping("/user/history")
+    public String historyPage(HttpServletRequest request, Model model, @RequestParam(defaultValue = "1") int page) {
+        String token = jwtCookieHelper.extractCookieToken(
+                request,
+                AuthController.COOKIE_NAME
+        );
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            show_info(model, token);
+
+            String username = jwtTokenProvider.extractUsername(token); // lấy username từ token jwt
+            Optional<UserProfileDTO> user = userService.findByUsername(username);
+
+            Page<PaymentInfo> paymentInfos = paymentInfoService.filterPaymentInfo(user.get().getId(), PageRequest.of(page-1, 15));
+
+            model.addAttribute("payinfos", paymentInfos);
+
+            return "user/history";
+        }
+        return "login";
+    }
+
+
+
     @GetMapping("/user/dashboard")
     public String dashboardPage(
             @RequestParam(required = false) Integer tinhId,
@@ -115,20 +148,20 @@ public class UserUIController {
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
             show_info(model, token);
-            
-            org.springframework.data.domain.Page<com.ev.batteryswap.pojo.Station> stationPage = 
+
+            org.springframework.data.domain.Page<com.ev.batteryswap.pojo.Station> stationPage =
                     stationService.filterStationsByLocation(tinhId, huyenId, xaId, org.springframework.data.domain.PageRequest.of(page - 1, size));
-            
+
             java.util.Map<Integer, java.util.Map<String, Long>> batteryStatsByStation = new java.util.HashMap<>();
             for (com.ev.batteryswap.pojo.Station station : stationPage.getContent()) {
                 batteryStatsByStation.put(station.getId(), batteryService.getBatteryStatisticsForStation(station));
             }
-            
+
             model.addAttribute("stations", stationPage.getContent());
             model.addAttribute("batteryStatsByStation", batteryStatsByStation);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", stationPage.getTotalPages());
-            
+
             // Retain search parameters
             model.addAttribute("tinhId", tinhId);
             model.addAttribute("huyenId", huyenId);
@@ -138,5 +171,6 @@ public class UserUIController {
         }
         return "login";
     }
+
 
 }

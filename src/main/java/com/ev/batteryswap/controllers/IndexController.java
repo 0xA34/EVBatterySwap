@@ -38,7 +38,7 @@ public class IndexController {
                 AuthController.COOKIE_NAME
         );
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
-            return "user/packages";
+            return "redirect:/my";
         }
         return "packages";
     }

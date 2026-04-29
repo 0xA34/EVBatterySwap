@@ -40,16 +40,14 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @ColumnDefault("0.00")
     @Column(name = "wallet_balance", precision = 12, scale = 2)
-    private BigDecimal walletBalance;
+    private BigDecimal walletBalance = new BigDecimal("0.00");
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
     @JoinColumn(name = "station_id")
     private Station station;
 
-    @ColumnDefault("'DRIVER'")
     @Column(name = "role")
     private String role = "DRIVER";
 
