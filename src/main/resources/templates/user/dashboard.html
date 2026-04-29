@@ -707,15 +707,13 @@
                 </div>
             </div>
 
-            <!-- Nút này tạm ẩn vì đã hiển thị đủ thông số trên thẻ -->
-            <!--
-            <a class="station-button" th:href="@{|/station?id=${station.id}|}">
+            <!-- Nút Xem danh sách pin -->
+            <a class="station-button" th:href="@{/user/station(id=${station.id})}">
                 <span>Xem danh sách pin</span>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
             </a>
-            -->
         </div>
     </div>
 

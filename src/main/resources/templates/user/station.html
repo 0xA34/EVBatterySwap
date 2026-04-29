@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trạm Pin - Danh sách pin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" th:href="@{/css/style.css(v=${#dates.createNow().time})}">
+    <style>
+        /* =====================================================
+           RESET & BASE STYLES
+        ===================================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* =====================================================
+           Z-INDEX FIX FOR HEADER DROPDOWNS
+        ===================================================== */
+        .site-header-user {
+            position: relative;
+            z-index: 1000 !important;
+        }
+
+        .site-header-user .submenu,
+        .site-header-user #notifDropdown {
+            z-index: 1001 !important;
+        }
+
+        /* =====================================================
+           STATION WRAPPER
+        ===================================================== */
+        .station-wrapper {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* =====================================================
+           STATION HEADER CARD
+        ===================================================== */
+        .station-header-card {
+            background: linear-gradient(135deg, #1d4ed8 0%, #312e81 100%);
+            color: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px rgba(29, 78, 216, 0.35);
+            margin-bottom: 2.5rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .station-header-card::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            top: -150px;
+            right: -150px;
+            animation: float 6s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .station-header-top {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: auto;
+        }
+
+        .station-header-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* CSS Icon - Battery Charging Station */
+        .css-station-icon {
+            width: 42px;
+            height: 42px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .css-station-icon::before {
+            content: '';
+            position: absolute;
+            width: 32px;
+            height: 40px;
+            border: 3px solid white;
+            border-radius: 6px;
+            background: linear-gradient(180deg,
+            rgba(255,255,255,0.3) 0%,
+            rgba(255,255,255,0.1) 100%);
+            box-shadow: inset 0 2px 8px rgba(255,255,255,0.2);
+        }
+
+        .css-station-icon::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 4px;
+            background: white;
+            border-radius: 2px 2px 0 0;
+            top: -2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .lightning-bolt {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 14px solid white;
+            z-index: 1;
+        }
+
+        .lightning-bolt::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-bottom: 14px solid white;
+            top: 4px;
+            left: -6px;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                opacity: 1;
+                filter: drop-shadow(0 0 2px rgba(255,255,255,0.8));
+            }
+            50% {
+                opacity: 0.6;
+                filter: drop-shadow(0 0 8px rgba(255,255,255,1));
+            }
+        }
+
+        .css-station-icon {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        .station-header-info {
+            flex: 1;
+            min-width: 240px;
+            position: relative;
+            z-index: auto;
+        }
+
+        .station-header-info h1 {
+            margin: 0 0 .5rem;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        .station-header-info p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.05rem;
+        }
+
+        .station-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            position: relative;
+            z-index: auto;
+        }
+
+        .station-stat-card {
+            background: rgba(255,255,255,0.18);
+            border-radius: 18px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.25);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .station-stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .station-stat-card h3 {
+            margin: 0 0 0.5rem;
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+
+        .station-stat-card span {
+            opacity: 0.9;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* =====================================================
+           PIN CARDS GRID
+        ===================================================== */
+        .pin-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.75rem;
+            margin-bottom: 3rem;
+        }
+
+        .pin-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .pin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .pin-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+            border-color: #cbd5f5;
+        }
+
+        .pin-card:hover::before {
+            opacity: 1;
+        }
+
+        .pin-chip {
+            align-self: flex-start;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1e40af;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 1px solid #93c5fd;
+        }
+
+        .pin-id {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0.25rem 0;
+        }
+
+        .pin-meta {
+            color: #64748b;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* MONEY ICON ANIMATION */
+        .money-icon {
+            color: #22c55e;
+            flex-shrink: 0;
+            position: relative;
+            animation: money-breathe 2.5s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes money-breathe {
+            0%, 100% {
+                transform: scale(1) translateY(0);
+                filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.4));
+            }
+            50% {
+                transform: scale(1.08) translateY(-1px);
+                filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.6));
+            }
+        }
+
+        .pin-meta:hover .money-icon {
+            animation: money-celebrate 0.7s ease-in-out;
+        }
+
+        @keyframes money-celebrate {
+            0% { transform: scale(1) rotate(0deg); }
+            15% { transform: scale(1.2) rotate(-10deg); }
+            30% { transform: scale(1.1) rotate(10deg); }
+            45% { transform: scale(1.25) rotate(-8deg); }
+            60% { transform: scale(1.15) rotate(8deg); }
+            75% { transform: scale(1.1) rotate(-4deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .money-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                    45deg,
+                    transparent 30%,
+                    rgba(255, 255, 255, 0.3) 50%,
+                    transparent 70%
+            );
+            animation: money-shine 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes money-shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .money-icon svg {
+            position: relative;
+            z-index: 1;
+        }
+
+        .pin-status-chip {
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            width: fit-content;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pin-status-chip::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .pin-status-full {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .pin-status-full::before { background: #22c55e; }
+
+        .pin-status-charging {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .pin-status-charging::before { background: #f59e0b; }
+
+        .pin-status-rented {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+        .pin-status-rented::before { background: #8b5cf6; }
+
+        .pin-status-maintenance {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .pin-status-maintenance::before { background: #ef4444; }
+
+        .pin-status-empty {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+        .pin-status-empty::before { background: #f97316; }
+
+        .battery-meter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .battery-bar {
+            flex: 1;
+            height: 20px;
+            background: #e5e7eb;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .battery-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 12px;
+        }
+
+        .battery-fill.high { background: linear-gradient(90deg, #22c55e, #16a34a); }
+        .battery-fill.medium { background: linear-gradient(90deg, #f59e0b, #d97706); }
+        .battery-fill.low { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+        .pin-actions {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .rent-button {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .rent-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+
+        .rent-button:disabled,
+        .rent-button.disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .rent-button:disabled:hover,
+        .rent-button.disabled:hover {
+            transform: none;
+        }
+
+        /* =====================================================
+           BACK ACTIONS & BUTTONS
+        ===================================================== */
+        .back-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button.secondary {
+            border: 1px solid #cbd5e1;
+            background: white;
+            color: #1f2937;
+        }
+
+        .button.secondary:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+        }
+
+        .button.primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+        .empty-state {
+            padding: 4rem 2rem;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            text-align: center;
+            border: 2px dashed #cbd5e1;
+            margin: 2rem 0;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+            font-size: 1.5rem;
+        }
+
+        .empty-state p {
+            color: #64748b;
+        }
+
+        /* =====================================================
+           EXCHANGE MODAL
+        ===================================================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem 2.5rem;
+            max-width: 460px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .modal-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+
+        .modal-close-btn {
+            border: none;
+            background: #e2e8f0;
+            width: 32px;
+            height: 32px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
+        }
+
+        .modal-close-btn:hover {
+            background: #cbd5e1;
+            transform: rotate(90deg);
+        }
+
+        .modal-info {
+            padding: 1rem;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .modal-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-info-label {
+            color: #64748b;
+        }
+
+        .modal-info-value {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+        }
+
+        .modal-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(34, 197, 94, 0.45);
+        }
+
+        .modal-btn.secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .modal-btn.secondary:hover {
+            background: #cbd5e1;
+        }
+
+        /* =====================================================
+           RATING MODAL
+        ===================================================== */
+        .rating-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+        }
+
+        .rating-modal-overlay.active {
+            display: flex;
+        }
+
+        .rating-modal-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .rating-modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .rating-modal-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .rating-modal-icon svg {
+            width: 36px;
+            height: 36px;
+            color: white;
+        }
+
+        .rating-modal-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .rating-modal-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+        }
+
+        .rating-modal-close-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            border: none;
+            background: #e2e8f0;
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
+        }
+
+        .rating-stars-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 16px;
+        }
+
+        .rating-star {
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #cbd5e1;
+        }
+
+        .rating-star:hover {
+            transform: scale(1.15);
+        }
+
+        .rating-star.active {
+            color: #fbbf24;
+            filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+        }
+
+        .rating-star svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .rating-feedback {
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-feedback label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .rating-feedback textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: all 0.2s ease;
+        }
+
+        .rating-feedback textarea:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+        }
+
+        .rating-message {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .rating-message.show {
+            display: block;
+        }
+
+        .rating-message.excellent {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .rating-message.good {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .rating-message.average {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .rating-message.poor {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .rating-message.bad {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .rating-modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .rating-modal-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .rating-modal-btn.primary {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(251, 191, 36, 0.35);
+        }
+
+        .rating-modal-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.45);
+        }
+
+        .rating-modal-btn.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .rating-modal-btn.secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .rating-modal-btn.secondary:hover {
+            background: #cbd5e1;
+        }
+
+        /* =====================================================
+           SCHEDULE PICKUP MODAL
+        ===================================================== */
+        .schedule-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2100;
+            backdrop-filter: blur(4px);
+        }
+
+        .schedule-modal-overlay.active {
+            display: flex;
+        }
+
+        .schedule-modal-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .schedule-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .schedule-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .schedule-modal-icon svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        .schedule-modal-title {
+            flex: 1;
+        }
+
+        .schedule-modal-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.25rem;
+        }
+
+        .schedule-modal-title p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .schedule-modal-close-btn {
+            border: none;
+            background: #e2e8f0;
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .schedule-modal-close-btn:hover {
+            background: #cbd5e1;
+            transform: rotate(90deg);
+        }
+
+        .schedule-battery-info {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e2e8f0;
+        }
+
+        .schedule-battery-info h3 {
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin: 0 0 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .schedule-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .schedule-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .schedule-info-label {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .schedule-info-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .schedule-time-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .time-input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .time-input-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .time-input-group label svg {
+            width: 18px;
+            height: 18px;
+            color: #8b5cf6;
+        }
+
+        .time-input-wrapper {
+            position: relative;
+        }
+
+        .time-input-wrapper input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .time-input-wrapper input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .time-input-wrapper input:disabled {
+            background: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+
+        .waiting-time-display {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border: 1px solid #93c5fd;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .waiting-time-display p {
+            margin: 0 0 0.25rem;
+            font-size: 0.85rem;
+            color: #1e40af;
+            font-weight: 500;
+        }
+
+        .waiting-time-display h4 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e40af;
+        }
+
+        .schedule-modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .schedule-modal-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .schedule-modal-btn.primary {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+        }
+
+        .schedule-modal-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45);
+        }
+
+        .schedule-modal-btn.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .schedule-modal-btn.secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .schedule-modal-btn.secondary:hover {
+            background: #cbd5e1;
+        }
+
+        /* =====================================================
+           PAYMENT CONFIRMATION MODAL
+        ===================================================== */
+        .payment-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2200;
+            backdrop-filter: blur(4px);
+        }
+
+        .payment-modal-overlay.active {
+            display: flex;
+        }
+
+        .payment-modal-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.4);
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .payment-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .payment-modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .payment-modal-icon svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        .payment-modal-title {
+            flex: 1;
+        }
+
+        .payment-modal-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.25rem;
+        }
+
+        .payment-modal-title p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .payment-modal-close-btn {
+            border: none;
+            background: #e2e8f0;
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            color: #475569;
+            transition: all 0.2s ease;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .payment-modal-close-btn:hover {
+            background: #cbd5e1;
+            transform: rotate(90deg);
+        }
+
+        .payment-summary-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .payment-section-title svg {
+            width: 20px;
+            height: 20px;
+            color: #3b82f6;
+        }
+
+        .payment-info-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 16px;
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        .payment-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .payment-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .payment-info-label {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .payment-info-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .payment-time-card {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 1px solid #c4b5fd;
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .payment-time-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .payment-time-row:not(:last-child) {
+            border-bottom: 1px dashed rgba(139, 92, 246, 0.2);
+        }
+
+        .payment-time-label {
+            font-size: 0.9rem;
+            color: #6d28d9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .payment-time-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .payment-time-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #5b21b6;
+        }
+
+        .payment-total-card {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 2px solid #86efac;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .payment-breakdown {
+            margin-bottom: 1rem;
+        }
+
+        .payment-breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .payment-breakdown-label {
+            font-size: 0.95rem;
+            color: #166534;
+        }
+
+        .payment-breakdown-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #166534;
+        }
+
+        .payment-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 2px solid #86efac;
+        }
+
+        .payment-total-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #14532d;
+        }
+
+        .payment-total-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #15803d;
+        }
+
+        .payment-modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .payment-modal-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .payment-modal-btn.primary {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+        }
+
+        .payment-modal-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.45);
+        }
+
+        .payment-modal-btn.secondary {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        .payment-modal-btn.secondary:hover {
+            background: #cbd5e1;
+        }
+
+        /* =====================================================
+           RESPONSIVE DESIGN
+        ===================================================== */
+        @media (max-width: 768px) {
+            .station-wrapper { padding: 0 1rem; }
+            .station-header-top { flex-direction: column; align-items: flex-start; }
+            .station-header-card { padding: 1.75rem; }
+            .station-header-info h1 { font-size: 1.75rem; }
+            .pin-cards-grid { grid-template-columns: 1fr; }
+            .back-actions { flex-direction: column; }
+
+            .modal-card {
+                margin: 0 1rem;
+                padding: 1.5rem 1.25rem;
+            }
+
+            .rating-modal-card {
+                margin: 0 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .rating-stars-container {
+                gap: 0.25rem;
+            }
+
+            .rating-star {
+                width: 42px;
+                height: 42px;
+            }
+
+            .schedule-modal-card,
+            .payment-modal-card {
+                margin: 0 1rem;
+                padding: 2rem 1.5rem;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .schedule-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-modal-card {
+                padding: 1.75rem 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Header -->
+<div th:replace="~{user/fragments/header :: site-header-user}"></div>
+
+<main class="station-wrapper">
+    <!-- Station Header -->
+    <section class="station-header-card">
+        <div class="station-header-top">
+            <div class="station-header-icon">
+                <div class="css-station-icon">
+                    <div class="lightning-bolt"></div>
+                </div>
+            </div>
+            <div class="station-header-info">
+                <h1 th:text="${stationName}">Trạm Pin Quận 1</h1>
+                <p th:text="${stationAddress}">123 Nguyễn Huệ, Quận 1, TP.HCM</p>
+            </div>
+        </div>
+        <div class="station-stats-grid">
+            <div class="station-stat-card">
+                <h3 th:text="${batteryStatsByStation['total']}">24</h3>
+                <span>Tổng số pin</span>
+            </div>
+            <div class="station-stat-card">
+                <h3 th:text="${batteryStatsByStation['available']}">18</h3>
+                <span>Pin sẵn sàng</span>
+            </div>
+            <div class="station-stat-card">
+                <h3 th:text="${batteryStatsByStation['charging']}">3</h3>
+                <span>Đang sạc</span>
+            </div>
+            <div class="station-stat-card">
+                <h3 th:text="${batteryStatsByStation['rented']}">2</h3>
+                <span>Đang thuê</span>
+            </div>
+            <div class="station-stat-card">
+                <h3 th:text="${batteryStatsByStation['maintenance']}">1</h3>
+                <span>Bảo trì</span>
+            </div>
+            <div class="station-stat-card">
+                <h3>100</h3>
+                <span>Số lần đổi tại trạm</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pin Cards Grid -->
+    <section class="pin-cards-grid" th:if="${batteryPage != null and !batteryPage.content.isEmpty()}">
+        <div class="pin-card" th:each="battery : ${batteryPage.content}">
+                <span class="pin-chip">
+                    🔋 ID <span th:text="${battery.serialNumber}">BAT-001</span>
+                </span>
+
+            <div class="pin-id" th:text="${battery.model}">Brand 48V 20Ah</div>
+
+            <div class="pin-meta">
+                <span>Dung Lượng:</span>
+                <strong th:text="${#numbers.formatInteger(battery.capacityKwh, 0)} + ' Wh'">960 Wh</strong>
+            </div>
+
+            <div class="pin-meta">
+                <span>Tình Trạng:</span>
+                <span th:if="${battery.status == 'AVAILABLE'}" class="pin-status-chip pin-status-full">Sẵn Sàng</span>
+                <span th:if="${battery.status == 'RENTED'}" class="pin-status-chip pin-status-rented">Đang Thuê</span>
+                <span th:if="${battery.status == 'MAINTENANCE'}" class="pin-status-chip pin-status-maintenance">Bảo Trì</span>
+                <span th:if="${battery.status == 'CHARGING'}" class="pin-status-chip pin-status-charging">Đang Sạc</span>
+            </div>
+
+            <div class="battery-meter" th:with="p=${battery.healthPercentage}">
+                <div class="battery-bar">
+                    <div class="battery-fill"
+                         th:classappend="${p} >= 80 ? ' high' : (${p} >= 40 ? ' medium' : ' low')"
+                         th:style="'width:' + ${p} + '%'">
+                    </div>
+                </div>
+                <span style="font-weight: 600; color: #1f2937;" th:text="${#numbers.formatInteger(p,0)} + '%'">95%</span>
+            </div>
+
+            <div class="pin-meta">
+                <svg class="money-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M6 10h.01M18 10h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round"/>
+                    <path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12h20" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 2" opacity="0.5"/>
+                </svg>
+                <span>Giá thuê:</span>
+                <strong style="color: #22c55e;"
+                        th:text="${#numbers.formatDecimal(battery.amount, 0, 'POINT', 0, 'NONE')} + ' VNĐ'">50,000 VNĐ</strong>
+            </div>
+
+            <div class="pin-actions">
+                <!-- Nút Đặt Lịch Lấy Pin -->
+                <a th:if="${battery.status == 'AVAILABLE'}"
+                   href="javascript:void(0);"
+                   class="rent-button open-schedule-modal"
+                   th:attr="
+                            data-station-id=${stationId},
+                            data-pin-id=${battery.id},
+                            data-serial=${battery.serialNumber},
+                            data-model=${battery.model},
+                            data-capacity=${battery.capacityKwh},
+                            data-price=${battery.amount},
+                            data-health=${battery.healthPercentage}
+                       ">
+                    Đặt Lịch Lấy Pin
+                </a>
+
+                <!-- Các trạng thái khác vẫn disabled -->
+                <a th:if="${battery.status == 'RENTED'}" class="rent-button disabled">Đặt Lịch Lấy Pin</a>
+                <a th:if="${battery.status == 'MAINTENANCE'}" class="rent-button disabled">Đặt Lịch Lấy Pin</a>
+                <a th:if="${battery.status == 'CHARGING'}" class="rent-button disabled">Đặt Lịch Lấy Pin</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Empty state -->
+    <section class="empty-state" th:if="${batteryPage == null or batteryPage.content.isEmpty()}">
+        <h3>Chưa có pin nào trong trạm</h3>
+        <p>Vui lòng quay lại sau hoặc chọn trạm khác.</p>
+    </section>
+
+    <!-- Back Actions -->
+    <div class="back-actions">
+        <a class="button secondary" href="dashboard">← Quay lại</a>
+        <a class="button primary" href="javascript:void(0);" id="openRatingModalBtn">Đánh giá trạm</a>
+    </div>
+</main>
+
+<!-- Schedule Pickup Modal -->
+<div id="scheduleModal" class="schedule-modal-overlay">
+    <div class="schedule-modal-card">
+        <div class="schedule-modal-header">
+            <div class="schedule-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div class="schedule-modal-title">
+                <h2>Đặt Lịch Lấy Pin</h2>
+                <p>Chọn thời gian bạn muốn đến lấy pin</p>
+            </div>
+            <button class="schedule-modal-close-btn" type="button" id="scheduleCloseBtn">✕</button>
+        </div>
+
+        <div class="schedule-battery-info">
+            <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="18" height="14" rx="2" ry="2"/>
+                    <path d="M20 10h2v4h-2"/>
+                    <path d="M6 11l3 3 5-5"/>
+                </svg>
+                Thông tin pin đã chọn
+            </h3>
+            <div class="schedule-info-grid">
+                <div class="schedule-info-item">
+                    <span class="schedule-info-label">Mã pin</span>
+                    <span class="schedule-info-value" id="scheduleSerial">—</span>
+                </div>
+                <div class="schedule-info-item">
+                    <span class="schedule-info-label">Loại pin</span>
+                    <span class="schedule-info-value" id="scheduleModel">—</span>
+                </div>
+                <div class="schedule-info-item">
+                    <span class="schedule-info-label">Dung lượng</span>
+                    <span class="schedule-info-value" id="scheduleCapacity">—</span>
+                </div>
+                <div class="schedule-info-item">
+                    <span class="schedule-info-label">Giá thuê</span>
+                    <span class="schedule-info-value" id="schedulePrice">—</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="schedule-time-section">
+            <div class="time-input-group">
+                <label>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Thời gian hiện tại
+                </label>
+                <div class="time-input-wrapper">
+                    <input type="datetime-local" id="currentTime" disabled>
+                </div>
+            </div>
+
+            <div class="time-input-group">
+                <label>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Thời gian đến lấy pin
+                </label>
+                <div class="time-input-wrapper">
+                    <input type="datetime-local" id="pickupTime">
+                </div>
+            </div>
+
+            <!-- Quick Time Buttons -->
+            <div style="margin-top: -4px; margin-bottom: 12px;">
+                <div style="font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: 500;">Chọn nhanh:</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <button type="button" class="quick-time-btn" data-minutes="20" style="padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">+20 phút</button>
+                    <button type="button" class="quick-time-btn" data-minutes="30" style="padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">+30 phút</button>
+                    <button type="button" class="quick-time-btn" data-minutes="40" style="padding: 5px 12px; border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.2s;">+40 phút</button>
+                    <button type="button" class="quick-time-btn" data-minutes="60" style="padding: 5px 12px; border: 1px solid #3b82f6; border-radius: 6px; background: #eff6ff; font-size: 12px; font-weight: 600; color: #1d4ed8; cursor: pointer; transition: all 0.2s;">+1 giờ</button>
+                    <button type="button" class="quick-time-btn" data-minutes="120" style="padding: 5px 12px; border: 1px solid #3b82f6; border-radius: 6px; background: #eff6ff; font-size: 12px; font-weight: 600; color: #1d4ed8; cursor: pointer; transition: all 0.2s;">+2 giờ</button>
+                    <button type="button" class="quick-time-btn" data-minutes="180" style="padding: 5px 12px; border: 1px solid #3b82f6; border-radius: 6px; background: #eff6ff; font-size: 12px; font-weight: 600; color: #1d4ed8; cursor: pointer; transition: all 0.2s;">+3 giờ</button>
+                </div>
+            </div>
+
+            <div class="waiting-time-display" id="waitingTimeDisplay" style="display: none;">
+                <p>Thời gian chờ</p>
+                <h4 id="waitingTimeValue">—</h4>
+            </div>
+        </div>
+
+        <div class="schedule-modal-actions">
+            <button type="button" class="schedule-modal-btn secondary" id="scheduleCancelBtn">
+                Hủy
+            </button>
+            <button type="button" class="schedule-modal-btn primary" id="scheduleNextBtn" disabled>
+                Tiếp Theo →
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Confirmation Modal -->
+<div id="paymentModal" class="payment-modal-overlay">
+    <div class="payment-modal-card">
+        <div class="payment-modal-header">
+            <div class="payment-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+            </div>
+            <div class="payment-modal-title">
+                <h2>Xác Nhận Thanh Toán</h2>
+                <p>Kiểm tra lại thông tin đặt lịch</p>
+            </div>
+            <button class="payment-modal-close-btn" type="button" id="paymentCloseBtn">✕</button>
+        </div>
+
+        <!-- Battery Info Section -->
+        <div class="payment-summary-section">
+            <h3 class="payment-section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                </svg>
+                Thông tin pin
+            </h3>
+            <div class="payment-info-card">
+                <div class="payment-info-row">
+                    <span class="payment-info-label">Mã pin</span>
+                    <span class="payment-info-value" id="paymentSerial">—</span>
+                </div>
+                <div class="payment-info-row">
+                    <span class="payment-info-label">Loại pin</span>
+                    <span class="payment-info-value" id="paymentModel">—</span>
+                </div>
+                <div class="payment-info-row">
+                    <span class="payment-info-label">Dung lượng</span>
+                    <span class="payment-info-value" id="paymentCapacity">—</span>
+                </div>
+                <div class="payment-info-row">
+                    <span class="payment-info-label">Tình trạng</span>
+                    <span class="payment-info-value" id="paymentHealth">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Info Section -->
+        <div class="payment-summary-section">
+            <h3 class="payment-section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Thời gian
+            </h3>
+            <div class="payment-time-card">
+                <div class="payment-time-row">
+                    <span class="payment-time-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Đặt lúc
+                    </span>
+                    <span class="payment-time-value" id="paymentReservationTime">—</span>
+                </div>
+                <div class="payment-time-row">
+                    <span class="payment-time-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Đến lấy lúc
+                    </span>
+                    <span class="payment-time-value" id="paymentPickupTime">—</span>
+                </div>
+                <div class="payment-time-row">
+                    <span class="payment-time-label">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Thời gian chờ
+                    </span>
+                    <span class="payment-time-value" id="paymentWaitingTime">—</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Total Section -->
+        <div class="payment-summary-section">
+            <h3 class="payment-section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Chi phí
+            </h3>
+            <div class="payment-total-card">
+                <div class="payment-breakdown">
+                    <div class="payment-breakdown-row">
+                        <span class="payment-breakdown-label">Giá thuê pin</span>
+                        <span class="payment-breakdown-value" id="paymentBatteryPrice">0 VNĐ</span>
+                    </div>
+                    <div class="payment-breakdown-row">
+                        <span class="payment-breakdown-label">Phí đặt lịch</span>
+                        <span class="payment-breakdown-value" id="paymentReservationFee">0 VNĐ</span>
+                    </div>
+                </div>
+                <div class="payment-total-row">
+                    <span class="payment-total-label">Tổng thanh toán</span>
+                    <span class="payment-total-value" id="paymentTotalAmount">0 VNĐ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-modal-actions">
+            <button type="button" class="payment-modal-btn secondary" id="paymentBackBtn">
+                ← Quay Lại
+            </button>
+            <button type="button" class="payment-modal-btn primary" id="paymentConfirmBtn">
+                Xác Nhận Thanh Toán
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Exchange Modal (Giữ lại cho chức năng đổi pin ngay lập tức nếu cần) -->
+<div id="exchangeModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <div class="modal-title">Xác nhận đổi pin</div>
+                <div class="modal-subtitle">
+                    Vui lòng kiểm tra lại thông tin trước khi xác nhận đổi pin.
+                </div>
+            </div>
+            <button class="modal-close-btn" type="button" id="modalCloseBtn">✕</button>
+        </div>
+
+        <div class="modal-info">
+            <div class="modal-info-row">
+                <span class="modal-info-label">ID Pin:</span>
+                <span class="modal-info-value" id="modalPinSerial">BAT-XXX</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Loại pin:</span>
+                <span class="modal-info-value" id="modalPinModel">Model</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Dung lượng:</span>
+                <span class="modal-info-value" id="modalPinCapacity">0 Wh</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Tình trạng pin:</span>
+                <span class="modal-info-value" id="modalPinHealth">0%</span>
+            </div>
+            <div class="modal-info-row">
+                <span class="modal-info-label">Giá thuê:</span>
+                <span class="modal-info-value" id="modalPinPrice">0 VNĐ</span>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button type="button" class="modal-btn secondary" id="modalCancelBtn">
+                Hủy
+            </button>
+            <button type="button" class="modal-btn primary" id="modalConfirmBtn">
+                Xác nhận đổi pin
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Rating Modal -->
+<div id="ratingModal" class="rating-modal-overlay">
+    <div class="rating-modal-card">
+        <button class="rating-modal-close-btn" type="button" id="ratingCloseBtn">✕</button>
+
+        <div class="rating-modal-header">
+            <div class="rating-modal-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+            </div>
+            <div class="rating-modal-title">Đánh giá trạm pin</div>
+            <div class="rating-modal-subtitle" id="stationNameDisplay" th:text="${stationName}">Tên Trạm</div>
+        </div>
+
+        <div class="rating-stars-container">
+                <span class="rating-star" data-rating="1">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </span>
+            <span class="rating-star" data-rating="2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </span>
+            <span class="rating-star" data-rating="3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </span>
+            <span class="rating-star" data-rating="4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </span>
+            <span class="rating-star" data-rating="5">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </span>
+        </div>
+
+        <div id="ratingMessage" class="rating-message"></div>
+
+        <div class="rating-feedback">
+            <label for="ratingComment">Chia sẻ thêm về trải nghiệm của bạn (tùy chọn)</label>
+            <textarea
+                    id="ratingComment"
+                    placeholder="Hãy cho chúng tôi biết điều gì khiến bạn hài lòng hoặc cần cải thiện..."></textarea>
+        </div>
+
+        <div class="rating-modal-actions">
+            <button type="button" class="rating-modal-btn secondary" id="ratingCancelBtn">
+                Hủy
+            </button>
+            <button type="button" class="rating-modal-btn primary" id="ratingSubmitBtn" disabled>
+                Gửi đánh giá
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<div th:replace="~{user/fragments/footer :: site-footer}"></div>
+
+<!-- JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // =====================================================
+        // UTILITY FUNCTIONS
+        // =====================================================
+        function formatCurrencyVND(value) {
+            if (value == null || value === '') return '0 VNĐ';
+            const number = Number(value);
+            if (isNaN(number)) return value + ' VNĐ';
+            return number.toLocaleString('vi-VN') + ' VNĐ';
+        }
+
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return '—';
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function calculateWaitingTime(fromTime, toTime) {
+            const from = new Date(fromTime);
+            const to = new Date(toTime);
+            const diff = to - from;
+
+            if (diff < 0) return 'Không hợp lệ';
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            if (hours > 0) {
+                return `${hours} giờ ${minutes} phút`;
+            } else {
+                return `${minutes} phút`;
+            }
+        }
+
+        function getCurrentDateTimeLocal() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localDate = new Date(now - offset);
+            return localDate.toISOString().slice(0, 16);
+        }
+
+        function getMinPickupTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 30);
+            const offset = now.getTimezoneOffset() * 60000;
+            const localDate = new Date(now - offset);
+            return localDate.toISOString().slice(0, 16);
+        }
+
+        // =====================================================
+        // SCHEDULE PICKUP MODAL
+        // =====================================================
+        const scheduleModal = document.getElementById('scheduleModal');
+        const scheduleCloseBtn = document.getElementById('scheduleCloseBtn');
+        const scheduleCancelBtn = document.getElementById('scheduleCancelBtn');
+        const scheduleNextBtn = document.getElementById('scheduleNextBtn');
+
+        const currentTimeInput = document.getElementById('currentTime');
+        const pickupTimeInput = document.getElementById('pickupTime');
+        const waitingTimeDisplay = document.getElementById('waitingTimeDisplay');
+        const waitingTimeValue = document.getElementById('waitingTimeValue');
+
+        let scheduleData = {
+            stationId: null,
+            batteryId: null,
+            serial: null,
+            model: null,
+            capacity: null,
+            price: null,
+            health: null,
+            currentTime: null,
+            pickupTime: null
+        };
+
+        function openScheduleModal(btn) {
+            scheduleData.stationId = btn.getAttribute('data-station-id');
+            scheduleData.batteryId = btn.getAttribute('data-pin-id');
+            scheduleData.serial = btn.getAttribute('data-serial') || '—';
+            scheduleData.model = btn.getAttribute('data-model') || '—';
+            scheduleData.capacity = btn.getAttribute('data-capacity') || '0';
+            scheduleData.price = btn.getAttribute('data-price') || '0';
+            scheduleData.health = btn.getAttribute('data-health') || '0';
+
+            document.getElementById('scheduleSerial').textContent = scheduleData.serial;
+            document.getElementById('scheduleModel').textContent = scheduleData.model;
+            document.getElementById('scheduleCapacity').textContent = scheduleData.capacity + ' Wh';
+            document.getElementById('schedulePrice').textContent = formatCurrencyVND(scheduleData.price);
+
+            const now = getCurrentDateTimeLocal();
+            currentTimeInput.value = now;
+            scheduleData.currentTime = now;
+
+            pickupTimeInput.value = '';
+            pickupTimeInput.min = getMinPickupTime();
+            waitingTimeDisplay.style.display = 'none';
+            scheduleNextBtn.disabled = true;
+
+            scheduleModal.classList.add('active');
+        }
+
+        function closeScheduleModal() {
+            scheduleModal.classList.remove('active');
+        }
+
+        pickupTimeInput.addEventListener('change', function () {
+            const pickupTime = this.value;
+            const currentTime = currentTimeInput.value;
+
+            if (!pickupTime) {
+                waitingTimeDisplay.style.display = 'none';
+                scheduleNextBtn.disabled = true;
+                return;
+            }
+
+            const minTime = getMinPickupTime();
+            if (pickupTime < minTime) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thời gian không hợp lệ',
+                    text: 'Thời gian đến lấy pin phải sau thời gian hiện tại ít nhất 30 phút'
+                });
+                this.value = '';
+                waitingTimeDisplay.style.display = 'none';
+                scheduleNextBtn.disabled = true;
+                return;
+            }
+
+            const waitTime = calculateWaitingTime(currentTime, pickupTime);
+            waitingTimeValue.textContent = waitTime;
+            waitingTimeDisplay.style.display = 'block';
+
+            scheduleData.pickupTime = pickupTime;
+            scheduleNextBtn.disabled = false;
+        });
+
+        scheduleCloseBtn.addEventListener('click', closeScheduleModal);
+        scheduleCancelBtn.addEventListener('click', closeScheduleModal);
+
+        // Quick-time buttons
+        document.querySelectorAll('.quick-time-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const minutes = parseInt(this.getAttribute('data-minutes'));
+                const now = new Date();
+                now.setMinutes(now.getMinutes() + minutes);
+                const offset = now.getTimezoneOffset() * 60000;
+                const localDate = new Date(now - offset);
+                const newPickupTime = localDate.toISOString().slice(0, 16);
+
+                const minTime = getMinPickupTime();
+                if (newPickupTime < minTime) {
+                    Swal.fire({ icon: 'warning', title: 'Thời gian quá ngắn', text: 'Thời gian đến lấy pin phải sau ít nhất 30 phút' });
+                    return;
+                }
+
+                pickupTimeInput.value = newPickupTime;
+                scheduleData.pickupTime = newPickupTime;
+
+                const waitTime = calculateWaitingTime(currentTimeInput.value, newPickupTime);
+                waitingTimeValue.textContent = waitTime;
+                waitingTimeDisplay.style.display = 'block';
+                scheduleNextBtn.disabled = false;
+
+                // Highlight active button
+                document.querySelectorAll('.quick-time-btn').forEach(b => b.style.fontWeight = '600');
+                this.style.outline = '2px solid #3b82f6';
+                setTimeout(() => this.style.outline = '', 800);
+            });
+        });
+
+        scheduleModal.addEventListener('click', function (e) {
+            if (e.target === scheduleModal) {
+                closeScheduleModal();
+            }
+        });
+
+        scheduleNextBtn.addEventListener('click', function () {
+            if (!scheduleData.pickupTime) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa chọn thời gian',
+                    text: 'Vui lòng chọn thời gian đến lấy pin'
+                });
+                return;
+            }
+
+            closeScheduleModal();
+            openPaymentModal();
+        });
+
+        // =====================================================
+        // PAYMENT CONFIRMATION MODAL
+        // =====================================================
+        const paymentModal = document.getElementById('paymentModal');
+        const paymentCloseBtn = document.getElementById('paymentCloseBtn');
+        const paymentBackBtn = document.getElementById('paymentBackBtn');
+        const paymentConfirmBtn = document.getElementById('paymentConfirmBtn');
+
+        const RESERVATION_FEE = 10000; // 10,000 VNĐ phí đặt lịch
+
+        function openPaymentModal() {
+            document.getElementById('paymentSerial').textContent = scheduleData.serial;
+            document.getElementById('paymentModel').textContent = scheduleData.model;
+            document.getElementById('paymentCapacity').textContent = scheduleData.capacity + ' Wh';
+            document.getElementById('paymentHealth').textContent = scheduleData.health + '%';
+
+            document.getElementById('paymentReservationTime').textContent = formatDateTime(scheduleData.currentTime);
+            document.getElementById('paymentPickupTime').textContent = formatDateTime(scheduleData.pickupTime);
+            document.getElementById('paymentWaitingTime').textContent = calculateWaitingTime(scheduleData.currentTime, scheduleData.pickupTime);
+
+            const batteryPrice = Number(scheduleData.price);
+            const totalAmount = batteryPrice + RESERVATION_FEE;
+
+            document.getElementById('paymentBatteryPrice').textContent = formatCurrencyVND(batteryPrice);
+            document.getElementById('paymentReservationFee').textContent = formatCurrencyVND(RESERVATION_FEE);
+            document.getElementById('paymentTotalAmount').textContent = formatCurrencyVND(totalAmount);
+
+            paymentModal.classList.add('active');
+        }
+
+        function closePaymentModal() {
+            paymentModal.classList.remove('active');
+        }
+
+        paymentCloseBtn.addEventListener('click', closePaymentModal);
+
+        paymentBackBtn.addEventListener('click', function () {
+            closePaymentModal();
+            scheduleModal.classList.add('active');
+        });
+
+        paymentModal.addEventListener('click', function (e) {
+            if (e.target === paymentModal) {
+                closePaymentModal();
+            }
+        });
+
+        paymentConfirmBtn.addEventListener('click', async function () {
+            if (!scheduleData.batteryId || !scheduleData.pickupTime) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Thiếu thông tin đặt lịch'
+                });
+                return;
+            }
+
+            const RESERVATION_FEE_JS = 10000;
+            const totalAmount = Number(scheduleData.price) + RESERVATION_FEE_JS;
+
+            try {
+                const response = await fetch('/api/user/reservations/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        stationId: scheduleData.stationId,
+                        batteryId: scheduleData.batteryId,
+                        pickupTime: scheduleData.pickupTime,
+                        amount: totalAmount
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đặt lịch thành công!',
+                        html: `
+                            <p>${data.message}</p>
+                            <p style="margin-top: 1rem; color: #64748b;">
+                                Vui lòng đến trạm vào <strong>${formatDateTime(scheduleData.pickupTime)}</strong>
+                            </p>
+                            <p style="color: #dc2626; font-weight: 600; margin-top: 0.5rem;">
+                                Đã trừ ${formatCurrencyVND(totalAmount)} từ ví của bạn.
+                            </p>
+                        `,
+                        showConfirmButton: true
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Đặt lịch thất bại',
+                        text: data.message || 'Vui lòng thử lại sau'
+                    });
+                }
+
+                closePaymentModal();
+
+            } catch (error) {
+                console.error('Reservation error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể kết nối đến máy chủ'
+                });
+            }
+        });
+
+        // =====================================================
+        // ATTACH SCHEDULE MODAL TO BUTTONS
+        // =====================================================
+        const scheduleTriggers = document.querySelectorAll('.open-schedule-modal');
+        scheduleTriggers.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                openScheduleModal(btn);
+            });
+        });
+
+        // =====================================================
+        // EXCHANGE MODAL LOGIC (Giữ nguyên)
+        // =====================================================
+        const modal = document.getElementById('exchangeModal');
+        const closeBtn = document.getElementById('modalCloseBtn');
+        const cancelBtn = document.getElementById('modalCancelBtn');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+
+        const serialEl = document.getElementById('modalPinSerial');
+        const modelEl = document.getElementById('modalPinModel');
+        const capacityEl = document.getElementById('modalPinCapacity');
+        const priceEl = document.getElementById('modalPinPrice');
+        const healthEl = document.getElementById('modalPinHealth');
+
+        let currentExchangeData = null;
+
+        function openModalFromButton(btn) {
+            const stationId = btn.getAttribute('data-station-id');
+            const pinId = btn.getAttribute('data-pin-id');
+            const serial = btn.getAttribute('data-serial') || '—';
+            const model = btn.getAttribute('data-model') || '—';
+            const capacity = btn.getAttribute('data-capacity') || '0';
+            const price = btn.getAttribute('data-price') || '0';
+            const health = btn.getAttribute('data-health') || '0';
+
+            currentExchangeData = {
+                stationId,
+                pinId,
+                serial,
+                model
+            };
+
+            serialEl.textContent = serial;
+            modelEl.textContent = model;
+            capacityEl.textContent = capacity + ' Wh';
+            priceEl.textContent = formatCurrencyVND(price);
+            healthEl.textContent = health + '%';
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        confirmBtn.addEventListener('click', async function () {
+            if (!currentExchangeData) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Lỗi',
+                    text: 'Không tìm thấy thông tin pin để đổi.'
+                });
+                return;
+            }
+
+            const params = new URLSearchParams({
+                station_id: currentExchangeData.stationId || '',
+                pin_id: currentExchangeData.pinId || '',
+                serial_number: currentExchangeData.serial || '',
+                model_batteries: currentExchangeData.model || ''
+            });
+
+            try {
+                const response = await fetch('/api/change?' + params.toString(), {
+                    method: 'POST'
+                });
+
+                const text = (await response.text()).trim();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: text,
+                        showConfirmButton: true
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else if (text === "Không Đủ Số Dư") {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Thông báo',
+                        text: text
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thông báo',
+                        text: text
+                    });
+                }
+
+                closeModal();
+
+            } catch (e) {
+                console.error(e);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Đổi Pin Thất Bại',
+                    text: 'Không thể kết nối đến máy chủ.'
+                });
+            }
+        });
+
+        // =====================================================
+        // RATING MODAL LOGIC (Giữ nguyên)
+        // =====================================================
+        const ratingModal = document.getElementById('ratingModal');
+        const openRatingBtn = document.getElementById('openRatingModalBtn');
+        const closeRatingBtn = document.getElementById('ratingCloseBtn');
+        const cancelRatingBtn = document.getElementById('ratingCancelBtn');
+        const submitRatingBtn = document.getElementById('ratingSubmitBtn');
+        const ratingStars = document.querySelectorAll('.rating-star');
+        const ratingMessage = document.getElementById('ratingMessage');
+        const ratingComment = document.getElementById('ratingComment');
+
+        let selectedRating = 0;
+
+        const ratingMessages = {
+            1: { text: 'Rất tệ - Chúng tôi rất tiếc khi bạn có trải nghiệm không tốt', class: 'bad' },
+            2: { text: 'Tệ - Chúng tôi sẽ cố gắng cải thiện dịch vụ', class: 'poor' },
+            3: { text: 'Trung bình - Cảm ơn phản hồi của bạn', class: 'average' },
+            4: { text: 'Tốt - Cảm ơn bạn đã đánh giá cao dịch vụ!', class: 'good' },
+            5: { text: 'Xuất sắc - Cảm ơn bạn rất nhiều! 🎉', class: 'excellent' }
+        };
+
+        function openRatingModal() {
+            ratingModal.classList.add('active');
+            resetRating();
+        }
+
+        function closeRatingModal() {
+            ratingModal.classList.remove('active');
+            resetRating();
+        }
+
+        function resetRating() {
+            selectedRating = 0;
+            ratingStars.forEach(star => star.classList.remove('active'));
+            ratingMessage.classList.remove('show', 'bad', 'poor', 'average', 'good', 'excellent');
+            ratingComment.value = '';
+            submitRatingBtn.disabled = true;
+        }
+
+        function updateStarDisplay(rating) {
+            ratingStars.forEach(star => {
+                const starValue = parseInt(star.getAttribute('data-rating'));
+                if (starValue <= rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function updateRatingMessage(rating) {
+            const message = ratingMessages[rating];
+            if (message) {
+                ratingMessage.textContent = message.text;
+                ratingMessage.className = 'rating-message show ' + message.class;
+            }
+        }
+
+        if (openRatingBtn) {
+            openRatingBtn.addEventListener('click', openRatingModal);
+        }
+
+        closeRatingBtn.addEventListener('click', closeRatingModal);
+        cancelRatingBtn.addEventListener('click', closeRatingModal);
+
+        ratingModal.addEventListener('click', function (e) {
+            if (e.target === ratingModal) {
+                closeRatingModal();
+            }
+        });
+
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function () {
+                selectedRating = parseInt(this.getAttribute('data-rating'));
+                updateStarDisplay(selectedRating);
+                updateRatingMessage(selectedRating);
+                submitRatingBtn.disabled = false;
+            });
+
+            star.addEventListener('mouseenter', function () {
+                const hoverRating = parseInt(this.getAttribute('data-rating'));
+                updateStarDisplay(hoverRating);
+            });
+        });
+
+        document.querySelector('.rating-stars-container').addEventListener('mouseleave', function () {
+            if (selectedRating > 0) {
+                updateStarDisplay(selectedRating);
+            } else {
+                ratingStars.forEach(star => star.classList.remove('active'));
+            }
+        });
+
+        submitRatingBtn.addEventListener('click', async function () {
+            if (selectedRating === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Vui lòng chọn số sao',
+                    text: 'Bạn chưa chọn mức độ đánh giá'
+                });
+                return;
+            }
+
+            const comment = ratingComment.value.trim();
+            const stationIdElement = document.querySelector('[data-station-id]');
+            const station_id = Number(stationIdElement.getAttribute('data-station-id'));
+
+            const params_rating = new URLSearchParams({
+                rating: selectedRating,
+                comment: comment,
+                station_id: station_id,
+            });
+
+            try {
+                const response = await fetch('/api/rating?' + params_rating.toString(), {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    closeRatingModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Cảm ơn bạn!',
+                        text: 'Đánh giá của bạn đã được gửi thành công',
+                        showConfirmButton: true
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    const errorText = await response.text();
+                    closeRatingModal();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gửi đánh giá thất bại',
+                        text: errorText || 'Vui lòng thử lại sau'
+                    });
+                }
+            } catch (error) {
+                console.error('Rating error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi kết nối',
+                    text: 'Không thể kết nối đến máy chủ'
+                });
+            }
+        });
+
+        // =====================================================
+        // UPDATE CURRENT TIME EVERY SECOND
+        // =====================================================
+        setInterval(function() {
+            if (scheduleModal.classList.contains('active')) {
+                const now = getCurrentDateTimeLocal();
+                currentTimeInput.value = now;
+                scheduleData.currentTime = now;
+                pickupTimeInput.min = getMinPickupTime();
+            }
+        }, 1000);
+    });
+</script>
+</body>
+</html>

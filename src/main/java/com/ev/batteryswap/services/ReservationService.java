@@ -3,6 +3,7 @@ package com.ev.batteryswap.services;
 import com.ev.batteryswap.pojo.*;
 import com.ev.batteryswap.repositories.*;
 import jakarta.persistence.criteria.Predicate;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -71,6 +72,20 @@ public class ReservationService {
                 "Pin này đã bị người khác đặt hoặc không sẵn sàng!"
             );
         }
+
+        // Kiểm tra và trừ tiền ví
+        final BigDecimal RESERVATION_FEE = new BigDecimal("10000");
+        BigDecimal batteryPrice = battery.getAmount() != null ? battery.getAmount() : BigDecimal.ZERO;
+        BigDecimal totalCharge = batteryPrice.add(RESERVATION_FEE);
+
+        if (user.getWalletBalance() == null || user.getWalletBalance().compareTo(totalCharge) < 0) {
+            throw new RuntimeException(
+                "Số dư ví không đủ. Cần " + totalCharge.toPlainString() + " VNĐ, hiện có " +
+                (user.getWalletBalance() != null ? user.getWalletBalance().toPlainString() : "0") + " VNĐ."
+            );
+        }
+        user.setWalletBalance(user.getWalletBalance().subtract(totalCharge));
+        userRepository.save(user);
 
         //đổi thời gian từ input sang Instant
         Instant pickupTime = LocalDateTime.parse(pickupTimeStr)

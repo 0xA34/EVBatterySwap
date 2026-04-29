@@ -1,7 +1,7 @@
 package com.ev.batteryswap.controllers.user;
 import com.ev.batteryswap.controllers.AuthController;
 import com.ev.batteryswap.dto.UserProfileDTO;
-import com.ev.batteryswap.pojo.PaymentInfo;
+import com.ev.batteryswap.pojo.*;
 import com.ev.batteryswap.security.JwtCookieHelper;
 import com.ev.batteryswap.services.PaymentInfoService;
 import com.ev.batteryswap.services.BatteryService;
@@ -17,7 +17,15 @@ import com.ev.batteryswap.security.JwtTokenProvider;
 import com.ev.batteryswap.services.UserService;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
+
+import com.ev.batteryswap.repositories.StationReviewRepository;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class UserUIController {
@@ -39,6 +47,8 @@ public class UserUIController {
     @Autowired
     private StationService stationService;
 
+    @Autowired
+    private StationReviewRepository stationReviewRepository;
 
     public UserUIController(JwtCookieHelper jwtCookieHelper) {
         this.jwtCookieHelper = jwtCookieHelper;
@@ -149,11 +159,11 @@ public class UserUIController {
         if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
             show_info(model, token);
 
-            org.springframework.data.domain.Page<com.ev.batteryswap.pojo.Station> stationPage =
-                    stationService.filterStationsByLocation(tinhId, huyenId, xaId, org.springframework.data.domain.PageRequest.of(page - 1, size));
+            Page<Station> stationPage =
+                    stationService.filterStationsByLocation(tinhId, huyenId, xaId, PageRequest.of(page - 1, size));
 
-            java.util.Map<Integer, java.util.Map<String, Long>> batteryStatsByStation = new java.util.HashMap<>();
-            for (com.ev.batteryswap.pojo.Station station : stationPage.getContent()) {
+            Map<Integer, Map<String, Long>> batteryStatsByStation = new java.util.HashMap<>();
+            for (Station station : stationPage.getContent()) {
                 batteryStatsByStation.put(station.getId(), batteryService.getBatteryStatisticsForStation(station));
             }
 
@@ -172,5 +182,73 @@ public class UserUIController {
         return "login";
     }
 
+    @GetMapping("/user/station")
+    public String stationPage(
+            @RequestParam Integer id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size,
+            HttpServletRequest request, Model model) {
+        String token = jwtCookieHelper.extractCookieToken(request, AuthController.COOKIE_NAME);
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            show_info(model, token);
+
+            Station station = stationService.getStationById(id);
+            if (station == null) return "redirect:/user/dashboard";
+
+            Page<Battery> batteryPage =
+                    batteryService.filterBatteries(id, null, null, PageRequest.of(page - 1, size));
+
+            model.addAttribute("stationId", station.getId());
+            model.addAttribute("stationName", station.getName());
+            model.addAttribute("stationAddress", station.getAddress());
+            model.addAttribute("batteryPage", batteryPage);
+            model.addAttribute("batteryStatsByStation", batteryService.getBatteryStatisticsForStation(station));
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", batteryPage.getTotalPages());
+
+            return "user/station";
+        }
+        return "login";
+    }
+
+    @PostMapping("/api/rating")
+    @ResponseBody
+    public ResponseEntity<?> addRating(
+            @RequestParam("rating") Byte rating,
+            @RequestParam(value = "comment", required = false) String comment,
+            @RequestParam("station_id") Integer stationId,
+            HttpServletRequest request) {
+
+        String token = jwtCookieHelper.extractCookieToken(request, AuthController.COOKIE_NAME);
+        if (token == null || !jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Vui lòng đăng nhập để đánh giá");
+        }
+
+        String username = jwtTokenProvider.extractUsername(token);
+        User user = userService.findUserByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Không tìm thấy người dùng");
+        }
+
+        Station station = stationService.getStationById(stationId);
+        if (station == null) {
+            return ResponseEntity.badRequest().body("Trạm không tồn tại");
+        }
+
+        if (stationReviewRepository.existsByUserAndStation(user, station)) {
+            return ResponseEntity.badRequest().body("Bạn đã đánh giá trạm này rồi!");
+        }
+
+        StationReview review = new StationReview();
+        review.setUser(user);
+        review.setStation(station);
+        review.setRating(rating);
+        review.setComment(comment);
+        review.setCreatedAt(Instant.now());
+
+        stationReviewRepository.save(review);
+
+        return ResponseEntity.ok("Cảm ơn bạn đã đánh giá!");
+    }
 
 }
