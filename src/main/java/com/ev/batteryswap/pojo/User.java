@@ -12,6 +12,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
+import java.util.ArrayList;
 
 @Getter
 @Setter
@@ -43,10 +45,13 @@ public class User {
     @Column(name = "wallet_balance", precision = 12, scale = 2)
     private BigDecimal walletBalance = new BigDecimal("0.00");
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "station_id")
-    private Station station;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_stations",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "station_id")
+    )
+    private List<Station> stations = new ArrayList<>();
 
     @Column(name = "role")
     private String role = "DRIVER";

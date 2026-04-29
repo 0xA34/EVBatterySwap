@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import jakarta.servlet.http.Cookie;
+import com.ev.batteryswap.pojo.Station;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,21 +49,43 @@ public class StaffReservationController {
         return userService.findUserByUsername(username);
     }
 
+    private Station getActiveStation(HttpServletRequest request, User staff) {
+        if (staff == null || staff.getStations() == null || staff.getStations().isEmpty()) return null;
+        
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("active_station_id".equals(c.getName())) {
+                    try {
+                        Integer stationId = Integer.parseInt(c.getValue());
+                        for (Station s : staff.getStations()) {
+                            if (s.getId().equals(stationId)) return s;
+                        }
+                    } catch (Exception e) {}
+                }
+            }
+        }
+        return staff.getStations().get(0);
+    }
+
     @GetMapping
     public String listReservations(Model model,
                                    @RequestParam(defaultValue = "0") int page,
                                    HttpServletRequest request) {
         User staff = getCurrentStaffUser(request);
-        if (staff == null || staff.getStation() == null) return "redirect:/staff/login";
+        Station station = getActiveStation(request, staff);
+        
+        if (staff == null || station == null) return "redirect:/staff/login";
 
         Page<Reservation> reservationPage = reservationService.getReservationsByStation(
-                staff.getStation().getId(),
+                station.getId(),
                 "PENDING",
                 PageRequest.of(page, 10, Sort.by("reservationTime").ascending())
         );
 
         model.addAttribute("reservationPage", reservationPage);
-        model.addAttribute("station", staff.getStation());
+        model.addAttribute("station", station);
+        model.addAttribute("staff", staff);
 
         List<Battery> rentedBatteries = batteryService.filterBatteries(null, "RENTED", null, PageRequest.of(0, 1000)).getContent();
         model.addAttribute("rentedBatteries", rentedBatteries);

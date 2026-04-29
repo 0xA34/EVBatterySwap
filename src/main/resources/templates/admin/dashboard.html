@@ -20,7 +20,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box bg-success">
                             <div class="inner">
-                                <h3>0 ₫</h3>
+                                <h3 th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</h3>
                                 <p>Tổng Doanh Thu</p>
                             </div>
                             <div class="icon"><i class="fas fa-coins"></i></div>
@@ -30,7 +30,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box bg-info">
                             <div class="inner">
-                                <h3>0</h3>
+                                <h3 th:text="${totalSwaps}">0</h3>
                                 <p>Lượt đổi pin</p>
                             </div>
                             <div class="icon"><i class="fas fa-exchange-alt"></i></div>
@@ -40,7 +40,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box bg-warning">
                             <div class="inner">
-                                <h3 >0</h3>
+                                <h3 th:text="${activeStations}">0</h3>
                                 <p>Trạm hoạt động</p>
                             </div>
                             <div class="icon"><i class="fas fa-charging-station"></i></div>
@@ -50,7 +50,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box bg-danger">
                             <div class="inner">
-                                <h3 >0</h3>
+                                <h3 th:text="${maintenanceBatteries}">0</h3>
                                 <p>Pin cần bảo dưỡng</p>
                             </div>
                             <div class="icon"><i class="fas fa-tools"></i></div>
@@ -89,5 +89,65 @@
 
 <div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        const hourlyReport = /*[[${hourlySwapReport}]]*/ [];
+        
+        // Khởi tạo mảng 24 giờ (từ 00:00 đến 23:00)
+        const labels = Array.from({length: 24}, (_, i) => i + ':00');
+        const data = Array(24).fill(0);
+        
+        // Cập nhật dữ liệu từ báo cáo
+        if (hourlyReport && Array.isArray(hourlyReport)) {
+            hourlyReport.forEach(item => {
+                const hour = item.hour || item.HOUR;
+                const count = item.count || item.COUNT;
+                if(hour !== undefined && hour >= 0 && hour < 24) {
+                    data[hour] = count;
+                }
+            });
+        }
+        
+        const ctx = document.getElementById('dashboardChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số lượt đổi pin',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw + ' lượt';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 </body>
 </html>

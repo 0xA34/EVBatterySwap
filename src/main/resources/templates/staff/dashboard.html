@@ -8,16 +8,16 @@
     <div class="content-wrapper">
         <section class="content-header">
             <div class="container-fluid">
-                <h1>Tổng quan Trạm: <span class="text-primary"></span></h1>
+                <h1>Tổng quan Trạm: <span class="text-primary" th:text="${station != null ? station.name : ''}"></span></h1>
             </div>
         </section>
         <section class="content">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>0</h3><p>Tổng pin tại trạm</p></div><div class="icon"><i class="fas fa-battery-full"></i></div></div></div>
-                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>0</h3><p>Pin Sẵn sàng</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
-                    <div class="col-lg-3 col-6"><div class="small-box bg-primary"><div class="inner"><h3>0</h3><p>Pin Đang sạc</p></div><div class="icon"><i class="fas fa-charging-station"></i></div></div></div>
-                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>0</h3><p>Pin Bảo dưỡng</p></div><div class="icon"><i class="fas fa-tools"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-info"><div class="inner"><h3 th:text="${totalBatteries}">0</h3><p>Tổng pin tại trạm</p></div><div class="icon"><i class="fas fa-battery-full"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-success"><div class="inner"><h3 th:text="${availableBatteries}">0</h3><p>Pin Sẵn sàng</p></div><div class="icon"><i class="fas fa-check-circle"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-primary"><div class="inner"><h3 th:text="${chargingBatteries}">0</h3><p>Pin Đang sạc</p></div><div class="icon"><i class="fas fa-charging-station"></i></div></div></div>
+                    <div class="col-lg-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3 th:text="${maintenanceBatteries}">0</h3><p>Pin Bảo dưỡng</p></div><div class="icon"><i class="fas fa-tools"></i></div></div></div>
                 </div>
                 <div class="card">
                     <div class="card-header"><h3 class="card-title">Tác vụ nhanh</h3></div>

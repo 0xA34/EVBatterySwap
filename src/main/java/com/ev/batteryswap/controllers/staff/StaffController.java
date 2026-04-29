@@ -1,6 +1,7 @@
 package com.ev.batteryswap.controllers.staff;
 
 import com.ev.batteryswap.pojo.Battery;
+import com.ev.batteryswap.pojo.Station;
 import com.ev.batteryswap.pojo.SwapTransaction;
 import com.ev.batteryswap.pojo.User;
 import com.ev.batteryswap.security.JwtCookieHelper;
@@ -9,7 +10,9 @@ import com.ev.batteryswap.services.interfaces.IBatteryService;
 import com.ev.batteryswap.services.interfaces.IMaintenanceLogService;
 import com.ev.batteryswap.services.interfaces.ITransactionService;
 import com.ev.batteryswap.services.interfaces.IUserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,16 +55,51 @@ public class StaffController {
         return userService.findUserByUsername(username);
     }
 
-    private String checkStaffStation(User staff, RedirectAttributes redirectAttributes) {
-        if (staff == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy tài khoản nhân viên. Vui lòng liên hệ Admin.");
-            return "redirect:/staff/login";
+    private Station getActiveStation(HttpServletRequest request, User staff) {
+        if (staff == null || staff.getStations() == null || staff.getStations().isEmpty()) return null;
+        
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("active_station_id".equals(c.getName())) {
+                    try {
+                        Integer stationId = Integer.parseInt(c.getValue());
+                        for (Station s : staff.getStations()) {
+                            if (s.getId().equals(stationId)) return s;
+                        }
+                    } catch (Exception e) {}
+                }
+            }
         }
-        if (staff.getStation() == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Tài khoản nhân viên chưa được gán trạm. Vui lòng liên hệ Admin.");
+        return staff.getStations().get(0);
+    }
+
+    private String checkStaffStation(Station station, RedirectAttributes redirectAttributes) {
+        if (station == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Tài khoản nhân viên chưa được gán trạm hoặc trạm không hợp lệ.");
             return "redirect:/staff/login";
         }
         return null;
+    }
+
+    @PostMapping("/switch-station")
+    public String switchStation(@RequestParam("stationId") Integer stationId,
+                                HttpServletRequest request,
+                                HttpServletResponse response,
+                                RedirectAttributes redirectAttributes) {
+        User staff = getCurrentStaffUser(request);
+        if (staff != null && staff.getStations() != null) {
+            boolean valid = staff.getStations().stream().anyMatch(s -> s.getId().equals(stationId));
+            if (valid) {
+                Cookie cookie = new Cookie("active_station_id", String.valueOf(stationId));
+                cookie.setPath("/");
+                cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+                response.addCookie(cookie);
+                redirectAttributes.addFlashAttribute("successMessage", "Đã chuyển đổi sang trạm làm việc mới!");
+            }
+        }
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/staff/dashboard");
     }
 
 //    @GetMapping("/dashboard")
@@ -83,14 +121,16 @@ public class StaffController {
                                    RedirectAttributes redirectAttributes,
                                    HttpServletRequest request) {
         User staff = getCurrentStaffUser(request);
-        String redirect = checkStaffStation(staff, redirectAttributes);
+        Station station = getActiveStation(request, staff);
+        String redirect = checkStaffStation(station, redirectAttributes);
         if (redirect != null) return redirect;
 
-        Integer stationId = staff.getStation().getId();
+        Integer stationId = station.getId();
         Page<SwapTransaction> transactionPage = transactionService.filterTransactions(stationId, paymentStatus, search, PageRequest.of(page, 15));
 
         model.addAttribute("transactionPage", transactionPage);
-        model.addAttribute("station", staff.getStation());
+        model.addAttribute("station", station);
+        model.addAttribute("staff", staff);
         model.addAttribute("selectedPaymentStatus", paymentStatus);
         model.addAttribute("search", search);
 
@@ -105,14 +145,16 @@ public class StaffController {
                                 RedirectAttributes redirectAttributes,
                                 HttpServletRequest request) {
         User staff = getCurrentStaffUser(request);
-        String redirect = checkStaffStation(staff, redirectAttributes);
+        Station station = getActiveStation(request, staff);
+        String redirect = checkStaffStation(station, redirectAttributes);
         if (redirect != null) return redirect;
 
-        Integer stationId = staff.getStation().getId();
+        Integer stationId = station.getId();
         Page<Battery> batteryPage = batteryService.filterBatteries(stationId, status, search, PageRequest.of(page, 15));
 
         model.addAttribute("batteryPage", batteryPage);
-        model.addAttribute("station", staff.getStation());
+        model.addAttribute("station", station);
+        model.addAttribute("staff", staff);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("search", search);
         return "staff/battery_inventory";
@@ -122,20 +164,22 @@ public class StaffController {
     public String showCreateTransactionForm(Model model, RedirectAttributes redirectAttributes,
                                             HttpServletRequest request) {
         User staff = getCurrentStaffUser(request);
-        String redirect = checkStaffStation(staff, redirectAttributes);
+        Station station = getActiveStation(request, staff);
+        String redirect = checkStaffStation(station, redirectAttributes);
         if (redirect != null) return redirect;
 
         SwapTransaction transaction = new SwapTransaction();
-        transaction.setStation(staff.getStation());
+        transaction.setStation(station);
 
         model.addAttribute("transaction", transaction);
+        model.addAttribute("staff", staff);
 
         // 1. Pin cũ (khách trả vào): Lấy TẤT CẢ pin đang RENTED
         Page<Battery> rentedBatteries = batteryService.filterBatteries(null, "RENTED", null, PageRequest.of(0, 1000));
         model.addAttribute("rentedBatteries", rentedBatteries.getContent());
 
         // 2. Pin mới (đưa cho khách): Lấy pin AVAILABLE tại trạm của staff
-        Integer stationId = staff.getStation().getId();
+        Integer stationId = station.getId();
         Page<Battery> availableBatteries = batteryService.filterBatteries(stationId, "AVAILABLE", null, PageRequest.of(0, 1000));
         model.addAttribute("availableBatteries", availableBatteries.getContent());
 
@@ -155,10 +199,11 @@ public class StaffController {
                                     RedirectAttributes redirectAttributes,
                                     HttpServletRequest request) {
         User staff = getCurrentStaffUser(request);
-        String redirect = checkStaffStation(staff, redirectAttributes);
+        Station station = getActiveStation(request, staff);
+        String redirect = checkStaffStation(station, redirectAttributes);
         if (redirect != null) return redirect;
 
-        transaction.setStation(staff.getStation());
+        transaction.setStation(station);
 
         try {
             transactionService.createTransaction(transaction);

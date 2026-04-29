@@ -61,6 +61,17 @@
                 </select>
               </div>
 
+              <div class="form-group" id="stationSelectionGroup" style="display: none;">
+                <label for="stationIds">Quản lý các trạm</label>
+                <select class="form-control select2" id="stationIds" name="stationIds" multiple="multiple" style="width: 100%;">
+                  <option th:each="station : ${allStations}" 
+                          th:value="${station.id}" 
+                          th:text="${station.name}"
+                          th:selected="${user.stations != null and #lists.contains(user.stations, station)}"></option>
+                </select>
+                <small class="form-text text-muted">Chỉ áp dụng cho vai trò Staff. Có thể chọn nhiều trạm.</small>
+              </div>
+
             </div>
             <div class="card-footer">
               <button type="submit" class="btn btn-primary">Lưu</button>
@@ -74,6 +85,29 @@
   <footer th:replace="~{admin/fragments/_footer :: footer}"></footer>
 </div>
 <div th:replace="~{admin/fragments/_footer :: common_scripts}"></div>
+
+<!-- Select2 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+  $(function () {
+    $('.select2').select2({
+        placeholder: "Chọn trạm...",
+        allowClear: true
+    });
+
+    function toggleStationSelection() {
+        if ($('#role').val() === 'STAFF') {
+            $('#stationSelectionGroup').show();
+        } else {
+            $('#stationSelectionGroup').hide();
+        }
+    }
+
+    $('#role').change(toggleStationSelection);
+    toggleStationSelection(); // Run on load
+  });
+</script>
 
 </body>
 </html>

@@ -168,7 +168,7 @@ public class UserService implements IUserService {
 
     @Override
     public List<User> getStaffByStation(Integer stationId) {
-        return userRepository.findByStation_IdAndRole(stationId, "STAFF");
+        return userRepository.findByStations_IdAndRole(stationId, "STAFF");
     }
 
     @Override
