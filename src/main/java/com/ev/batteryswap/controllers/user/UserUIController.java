@@ -122,6 +122,21 @@ public class UserUIController {
     }
 
 
+    @GetMapping("/user/contact")
+    public String contactPage(HttpServletRequest request, Model model) {
+        String token = jwtCookieHelper.extractCookieToken(
+                request,
+                AuthController.COOKIE_NAME
+        );
+        if (token != null && jwtCookieHelper.isValidRoleToken(token, "DRIVER")) {
+            show_info(model, token);
+
+            return "user/contact";
+        }
+        return "login";
+    }
+
+
     @GetMapping("/user/history")
     public String historyPage(HttpServletRequest request, Model model, @RequestParam(defaultValue = "1") int page) {
         String token = jwtCookieHelper.extractCookieToken(
