@@ -10,6 +10,8 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,15 @@ public class ReservationService {
 
     @Autowired
     private SwapTransactionRepository transactionRepository;
+
+    @Autowired
+    private PaymentInfoRepository paymentInfoRepository;
+
+
+    String generateTransactionId() {
+        long number = ThreadLocalRandom.current().nextLong(100000000000L, 999999999999L);
+        return String.valueOf(number);
+    }
 
     public Page<Reservation> getReservationsByStation(
         Integer stationId,
@@ -104,8 +115,18 @@ public class ReservationService {
         reservation.setReservationTime(pickupTime);
         reservation.setExpiresAt(pickupTime.plus(30, ChronoUnit.MINUTES)); //hết hạn sau 30p so với giờ hẹn
         reservation.setStatus("PENDING");
-
         reservationRepository.save(reservation);
+
+
+        // Lưu lịch sử giao dịch
+        PaymentInfo paymentInfo = new PaymentInfo();
+        paymentInfo.setUser(user);
+        paymentInfo.setAmount(totalCharge);
+        paymentInfo.setTransactionId(generateTransactionId());
+        paymentInfo.setPaymentMethod("Thuê gói");
+        paymentInfo.setNote(battery.getModel());
+
+        paymentInfoRepository.save(paymentInfo);
     }
 
     @Transactional
